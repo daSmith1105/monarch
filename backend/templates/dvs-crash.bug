@@ -1,0 +1,20 @@
+{
+	product => "Support",
+	component => "reports",
+	version => "@@SERIAL@@",
+	priority => "P3",
+	op_sys => "All",
+	platform => "All",
+	severity => "normal",
+	summary => "Crash Report - @@SERIAL@@ - @@COMPANY@@ - @@NAME@@",
+	assigned_to => "@@ASSIGNEE@@",
+	comment => "
+Company: @@COMPANY@@
+Name:    @@NAME@@
+Local:   @@LOCAL@@
+User:    @@USER@@
+
+cs@@SERIAL@@ generated the following exception log
+--------------------------------------------------
+@@TRACEBACK@@"
+};

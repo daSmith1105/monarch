@@ -1,0 +1,31 @@
+.rdaTable table {
+	margin: 0px;
+	padding: 5px;
+}
+.rdaTable .header {
+	font: bold 11px Arial, Helvetica, sans-serif;
+	color: white;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: center;
+	padding: 2px 5px 2px 5px;
+	background-color: #00729a;
+}
+.rdaTable .row {
+	font: normal 10px Arial, Helvetica, sans-serif;
+	color: black;
+	letter-spacing: 2px;
+	padding: 2px 5px 2px 5px;
+	background-color: transparent;
+	height: 3.5em;
+}
+.rdaTable .row-alt {
+	background-color: #cfe5ed;
+}
+.rdaTable .row-highlight {
+	color: white;
+	background-color: #00729a;
+}
+.rdaTable .row-td {
+	padding: 2px 5px 2px 5px;
+}

@@ -1,0 +1,16 @@
+{
+	product => "Support",
+	component => "reports",
+	version => "@@SERIAL@@",
+	priority => "P2",
+	op_sys => "All",
+	platform => "All",
+	severity => "normal",
+	summary => "Offline - @@SERIAL@@ - @@COMPANY@@ - @@NAME@@",
+	assigned_to => "@@ASSIGNEE@@",
+	comment => "
+Company: @@COMPANY@@
+Name:    @@NAME@@
+
+cs@@SERIAL@@ has been offline for 24 hours."
+};

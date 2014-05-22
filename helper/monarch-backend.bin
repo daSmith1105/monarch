@@ -1,0 +1,16 @@
+#!/bin/sh
+
+CWD=`pwd`
+
+export PYTHONPATH=/usr/share/monarch-backend
+cd /usr/share/monarch-backend
+RETVAL=
+if [ -f monarch-backend.py ] ; then
+	python ./monarch-backend.py "$@"
+else
+	python ./monarch-backend.pyc $*
+fi
+RETVAL=$?
+cd ${CWD}
+
+exit ${RETVAL}

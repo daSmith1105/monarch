@@ -1,0 +1,17 @@
+{
+	product => "Support",
+	component => "reports",
+	version => "@@SERIAL@@",
+	priority => "P2",
+	op_sys => "All",
+	platform => "All",
+	severity => "normal",
+	summary => "Camera Down - @@SERIAL@@ - @@CAMERA@@ - @@COMPANY@@ - @@NAME@@",
+	assigned_to => "@@ASSIGNEE@@",
+	comment => "
+Company: @@COMPANY@@
+Name:    @@NAME@@
+Camera:  @@CAMERA@@
+
+Camera @@CAMERA@@ on server cs@@SERIAL@@ has been down for 24 hours."
+};

@@ -1,0 +1,74 @@
+/*
+ * Setup background color and overflow
+ */
+html, body {
+	height: 100%; width: 100%;
+	overflow: hidden;
+	background: transparent;
+	margin: 0;
+	padding: 0;
+	background-color: #00ff00;
+}
+/*
+ * Container to overlay the form on top of the background image
+ */
+.loginBox {
+	background-color: #005fa3;
+	border: 2px solid #345c80;
+}
+/*
+ * Title text
+ */
+.loginTitle {
+	text-align: center;
+	color: #a0a0a0;
+	font-weight: bold;
+	font-size: 1.18em;
+}
+/*
+ * Warning display text
+ */
+.loginError {
+	text-align: center;
+	color: red;
+	font-weight: bold;
+}
+/*
+ * All other text on the login box
+ */
+.loginText {
+	color: #a0a0a0;
+	font-weight: bold;
+}
+
+/*
+ * Copyright information
+ */
+.copyright {
+	font-size: .75em;
+	font-family: Arial, Helvetica, serif;
+	background-color: transparent;
+	color: #000000;
+}
+/*
+ * Application Launch Links
+ */
+#Link {
+	text-align: center;
+}
+A:link {
+	text-decoration: none;
+	color: #c0c0c0;
+}
+A:visited {
+	text-decoration: none;
+	color: #c0c0c0;
+}
+A:active {
+	text-decoration: none;
+	color: #c0c0c0;
+}
+A:hover {
+	text-decoration: underline overline;
+	color: red;
+}

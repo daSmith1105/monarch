@@ -1,0 +1,27 @@
+From: Dividia Technologies <bugzilla@dividia.net>
+Subject: @@SUBJECT@@
+To: @@TO@@
+Content-Type: text/html
+
+<html>
+<body>
+<p>
+Below is a list of bugs that are marked as RESOLVED with a<br />
+resolution of REMIND or LATER.  Please review these<br />
+bugs and make sure we do not need to change the resolution.
+</p>
+<table border="0">
+	<tr>
+		<th align="left" width="75">Bug</th>
+		<th align="left">Description</th>
+	</tr>
+@@BUGS@@
+</table>
+<p>
+Dividia Technologies, LLC<br />
+Support Department<br />
+866-348-4342<br />
+support@dividia.net
+</p>
+</body>
+</html>

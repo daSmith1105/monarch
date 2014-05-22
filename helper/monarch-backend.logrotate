@@ -1,0 +1,16 @@
+/var/log/monarch-backend.log {
+    missingok
+    notifempty
+    sharedscripts
+		size=500k
+    postrotate
+	/sbin/service monarch-backend restart 1>/dev/null 2>/dev/null || true
+    endscript
+}
+
+/var/log/cdburn.log {
+    missingok
+    notifempty
+    sharedscripts
+		size=500k
+}

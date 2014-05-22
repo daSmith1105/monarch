@@ -1,0 +1,28 @@
+From: Dividia Technologies <bugzilla@dividia.net>
+Subject: @@SUBJECT@@
+To: @@TO@@
+Content-Type: text/html
+
+<html>
+<body>
+<p>
+Below is a list of servers that have been installed in the field (test is not in categories).<br />
+However, there is no install date listed in the database.  Please update this date or set<br />
+the maintenance plan to something other than "install".
+</p>
+<table border="0">
+	<tr>
+		<th align="left" width="75">Serial</th>
+		<th align="left">Company</th>
+		<th align="left">Name</th>
+	</tr>
+@@SERVERLIST@@
+</table>
+<p>
+Dividia Technologies, LLC<br />
+Support Department<br />
+866-348-4342<br />
+support@dividia.net
+</p>
+</body>
+</html>

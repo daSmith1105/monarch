@@ -1,0 +1,20 @@
+{
+	product => "Support",
+	component => "reports",
+	version => "@@SERIAL@@",
+	priority => "P2",
+	op_sys => "All",
+	platform => "All",
+	severity => "normal",
+	summary => "Maintenance - @@SERIAL@@ - @@COMPANY@@ - @@NAME@@",
+	assigned_to => "@@ASSIGNEE@@",
+	comment => "
+Company: @@COMPANY@@
+Name:    @@NAME@@
+
+This customer is at the end of their free 6 months of maintenance.
+Make sure the Sales Department contacts them.  Leave this bug open
+until the customer accepts/rejects the maintenance plan.  If they
+reject, then close this bug and update the servers table to set
+maintenance == 'no'.  Otherwise, make sure to set maintenance == 'yes'."
+};

@@ -1,0 +1,18 @@
+This document describes how to bootstrap a test Monarch system.
+
+1) Make sure svn repo exists @ /rda/devel
+2) Create Symlinks
+ - Symlink /rda/devel/trunk/monarch/backend /usr/share/monarch-backend
+ - Symlink /rda/devel/trunk/monarch/html /var/www/html/monarch
+ - Symlink /rda/devel/trunk/monarch/helper/monarch-backend.bin
+   /usr/local/bin/monarch-backend
+ - Symlink /rda/devel/trunk/monarch/helper/monarch-backend.init
+   /etc/init.d/monarch-backend
+3) Create databases
+ mysql -p < /rda/devel/trunk/monarch/backend/monarch.sql
+ mysql -p < /rda/devel/trunk/monarch/backend/bugs.sql
+ mysql -p < /rda/devel/trunk/monarch/backend/price-list.sql
+4) Add the following to /etc/httpd/conf/httpd.conf
+ ProxyPass /MONARCH/ http://127.0.0.1:9000/ retry=5 flushpackets=auto flushwait=10
+ ProxyPassReverse /MONARCH/ http://127.0.0.1:9000/
+5) /etc/init.d/monarch-backend start

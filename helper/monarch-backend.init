@@ -1,0 +1,226 @@
+#!/bin/sh
+#
+# monarch-backend	This shell script takes care of starting and stopping
+#		the monarch-backend daemon.
+#
+# chkconfig: 2345 81 08
+# description: vcengine is the motion detection daemon.
+
+# Source function library.
+. /etc/init.d/functions
+
+# Source networking configuration.
+. /etc/sysconfig/network
+
+PATH=${PATH}:/usr/local/bin
+PROG=monarch-backend
+RETVAL=0
+LOCK=/var/lock/subsys
+RUN=/var/run
+DEBUG=1
+
+# Global variable to store pid from get_pid function
+PID=
+get_pid() {
+	# by pid file
+	if [ -e ${RUN}/${PROG}.pid ] ; then
+		PID=`cat ${RUN}/${PROG}.pid`
+		[ -n "${PID}" ] && return 0
+	fi
+
+	# by port
+	PID=`netstat -nlp | grep "9000[[:space:]]" | tr -s " " | cut -d' ' -f7 | cut -d'/' -f1`
+	[ -n "${PID}" ] && return 0
+
+	# by name (/proc)
+	for PID in /proc/[0-9]*
+	do
+		if grep "${PROG}" ${PID}/cmdline >/dev/null
+		then	
+			if grep "${PROG}.log" ${PID}/cmdline >/dev/null
+			then
+				continue
+			elif grep "yum" ${PID}/cmdline >/dev/null
+			then
+				continue
+			elif grep "rpm" ${PID}/cmdline >/dev/null
+			then
+				continue
+			elif grep "service" ${PID}/cmdline >/dev/null
+			then
+				continue
+			elif grep "/bin/sh" ${PID}/cmdline >/dev/null
+			then
+				continue
+			else
+				PID=${PID##/proc/}
+				return 0
+			fi
+		fi
+	done
+
+	# not found
+	PID=0
+	return 1
+}
+
+start() {
+	# Start daemons.
+	if [ -f ${LOCK}/${PROG} ] ; then
+		stop
+		sleep 2
+		rm -f ${LOCK}/${PROG}
+	fi
+	echo -n $"Starting ${PROG}: "
+	OPTS=
+	if [ ${DEBUG} -eq 1 ] ; then
+		OPTS=" --debug"
+	fi
+	# Hack to make sure another prog didn't grab our port
+	netstat -nlp | grep "9000[[:space:]]" | tr -s " " | cut -d' ' -f7 | cut -d'/' -f1 | xargs kill -9 2>/dev/null
+	daemon ${PROG} ${OPTS}
+	RETVAL=$?
+	if [ ${RETVAL} -eq 0 ]
+	then
+		touch ${LOCK}/${PROG}
+		success $"${PROG} startup"
+		echo
+	else
+		failure $"${PROG} startup"
+		echo
+	fi
+	return ${RETVAL}
+}
+
+stop() {
+	# Stop daemons.
+	echo -n $"Stopping ${PROG}: "
+
+	PIDCOUNT=5
+	while [ ${PIDCOUNT} -gt 0 ] ; do
+		get_pid
+		SAVEPID=${PID}
+
+		[ ${PID} -eq 0 ] && break
+
+		# Loop 5 times waiting for kill to succeed
+		kill -TERM ${PID} 1>/dev/null 2>/dev/null
+		WAITCOUNT=10
+		while [ ${WAITCOUNT} -gt 0 ] ; do
+			get_pid
+			[ ${SAVEPID} -ne ${PID} ] && break
+
+			WAITCOUNT=$((WAITCOUNT-1))
+			sleep 1
+		done
+
+		if [ ${WAITCOUNT} -eq 0 ] ; then
+			# Hard kill
+			kill -9 ${PID} 1>/dev/null 2>/dev/null
+		fi
+
+		# remove pidfile
+		rm -f ${RUN}/${PROG}.pid
+
+		PIDCOUNT=$((PIDCOUNT-1))
+	done
+
+	if [ ${PIDCOUNT} -ne 0 ]
+	then
+		rm -f ${LOCK}/${PROG}
+		success $"${PROG} shutdown"
+		echo
+		RETVAL=0
+	else
+		failure $"${PROG} shutdown"
+		echo
+		RETVAL=1
+	fi
+	return ${RETVAL}
+}
+
+status() {
+	get_pid
+
+	if [ ${PID} -ne 0 ] ; then
+		echo $"${PROG} (pid ${PID}) is running..."
+		return 0
+	fi
+
+	# Next try "/var/run/*.pid" files
+	if [ -f /var/run/${PROG}.pid ] ; then
+	        read pid < /var/run/${PROG}.pid
+	        if [ -n "$pid" ]; then
+	                echo $"${PROG} dead but pid file exists"
+	                return 1
+	        fi
+	fi
+	# See if /var/lock/subsys/${base} exists
+	if [ -f /var/lock/subsys/${PROG} ]; then
+		echo $"${PROG} dead but subsys locked"
+		return 2
+	fi
+	echo $"${PROG} is stopped"
+	return 3
+}
+
+reload() {
+	# Reload daemons.
+	echo -n $"Reloading ${PROG}: "
+
+	get_pid
+	if [ ${PID} -ne 0 ]
+	then
+		kill -HUP ${PID} 2>/dev/null
+		RETVAL=$?
+		if [ ${RETVAL} -eq 0 ]
+		then
+			success $"${PROG} reload"
+			echo
+		else
+			failure $"${PROG} reload"
+			echo
+		fi
+	else
+		failure $"${PROG} reload"
+		echo
+	fi
+	return ${RETVAL}
+}
+
+# See how we were called.
+case "$1" in
+  start)
+	start
+        ;;
+  stop)
+	stop
+        ;;
+  status)
+	status
+	RETVAL=$?
+	;;
+  restart)
+	stop
+	sleep 1
+	start
+	RETVAL=$?
+	;;
+  condrestart)
+	if [ -f /var/lock/subsys/monarch-backend ]; then
+	    stop
+            sleep 1
+	    start
+	    RETVAL=$?
+	fi
+	;;
+	reload)
+	reload
+	RETVAL=$?
+	;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|condrestart|reload|status}"
+        exit 1
+esac
+
+exit ${RETVAL}

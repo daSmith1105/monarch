@@ -1,0 +1,39 @@
+/*
+ * DVS Info Table
+ */
+.tblServerInfo {
+	padding: 0;
+	margin: 0;
+}
+.tblServerInfo TH {
+	font: bold 11px Arial, Helvetica, sans-serif;
+	color: white;
+	border: 1px solid black;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: center;
+	padding: 2px 5px 2px 5px;
+	background-color: #00729a;
+}
+.tblServerInfo TD {
+	font: normal 10px Arial, Helvetica, sans-serif;
+	color: black;
+	border-right: 1px solid #00729a;
+	border-bottom: 1px solid #00729a;
+	border-left: 1px solid #00729a;
+	letter-spacing: 2px;
+	text-transform: none;
+	text-align: left;
+	padding: 2px 5px 2px 5px;
+	background-color: transparent;
+	height: 3.5em;
+}
+.tblServerInfo TD.lbl {
+	font: bold 10px Arial, Helvetica, sans-serif;
+	border-right: none;
+	text-align: right;
+}
+.tblServerInfo P {
+	margin: 3px;
+	padding: 0;
+}

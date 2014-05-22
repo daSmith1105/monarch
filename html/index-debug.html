@@ -1,0 +1,64 @@
+<html>
+<head>
+	<title>Dividia Control Center (Monarch) - Debug Mode</title>
+
+	<script type="text/javascript" src="js/src/rda/vcXMLRPC.js"></script>
+	<script type="text/javascript" src="js/src/rda/sorttable.js"></script>
+	<script type="text/javascript" src="js/src/dojoroot/dojo/dojo.js"
+		djConfig="isDebug: true, debugAtAllCosts: true"></script>
+	<script type="text/javascript" language="JavaScript">
+		dojo.registerModulePath( "rda", "../../rda" );
+		dojo.require( "rda.Monarch" );
+
+		var oMonarch = null;
+
+		function init()
+		{
+			oMonarch = new rda.Monarch();
+			oMonarch.init();
+			sorttable.init();
+		}
+
+		function destroy()
+		{
+			if ( oMonarch != null ) {
+				oMonarch.destroy();
+				oMonarch = null;
+			}
+		}
+
+		function confirmExit()
+		{
+			if ( oMonarch.oAuthModel.checkIsLoaded() )
+				return 'Doing so will terminate the Dividia Control Center.';
+		}
+
+		dojo.addOnLoad( init );
+		dojo.addOnUnload( destroy );
+		//window.onbeforeunload = confirmExit;
+	</script>
+
+	<style type="text/css">
+		@import "js/src/dojoroot/dojo/resources/dojo.css";
+		@import "js/src/dojoroot/dijit/themes/tundra/tundra.css";
+		@import "js/src/rda/themes/tundra/Table.css";
+		@import "js/src/rda/themes/tundra/LoginView.css";
+		@import "js/src/rda/themes/tundra/WelcomeView.css";
+		@import "js/src/rda/themes/tundra/RegistrationsView.css";
+	</style>
+
+	<style>
+		html, body {
+			height: 100%; width: 100%;
+			background: transparent;
+			margin: 0;
+			padding: 0;
+			background-color: #ffffff;
+		}
+	</style>
+</head>
+
+<body class="tundra">
+	<div id="content"></div>
+</body>
+</html>

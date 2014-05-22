@@ -1,0 +1,30 @@
+{
+	product => "Support",
+	component => "reports",
+	version => "@@SERIAL@@",
+	priority => "P2",
+	op_sys => "All",
+	platform => "All",
+	severity => "normal",
+	summary => "Weekly Check - @@SERIAL@@ - @@COMPANY@@ - @@NAME@@",
+	assigned_to => "@@ASSIGNEE@@",
+	comment => "
+Company: @@COMPANY@@
+Name:    @@NAME@@
+
+This customer is on a maintenance plan that includes weekly monitoring
+of their DVS.  Please check the following and add which items you checked,
+when closing this ticket, in the comments section.
+
+All Customers
+1) All shots are clean
+2) Storage is adequate (>=30 days)
+3) Playback on all cameras to verify video is recording
+4) PTZ cameras move
+5) License Plate cameras get plates
+6) Check mask file for each camera
+
+JWS Customers
+7) Tickets of daytime has legible license plates
+8) Tickets of nightime has legible license plates"
+};

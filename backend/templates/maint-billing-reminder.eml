@@ -1,0 +1,29 @@
+From: Dividia Technologies <bugzilla@dividia.net>
+Subject: @@SUBJECT@@
+To: @@TO@@
+Content-Type: text/html
+
+<html>
+<body>
+<p>
+Below is a list of all servers that are marked with a valid maintenance plan (ie. not no,free,install).<br />
+Please check this list against all customers that are getting billed for maintenance.  If there are any<br />
+discrepancies, please update Monarch.
+</p>
+<table border="0">
+	<tr>
+		<th align="left" width="75">Serial</th>
+		<th align="left">Company</th>
+		<th align="left">Name</th>
+		<th align="left">Maintenance</th>
+	</tr>
+@@SERVERLIST@@
+</table>
+<p>
+Dividia Technologies, LLC<br />
+Support Department<br />
+866-348-4342<br />
+support@dividia.net
+</p>
+</body>
+</html>

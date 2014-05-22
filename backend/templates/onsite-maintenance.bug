@@ -1,0 +1,40 @@
+{
+	product => "Support",
+	component => "Fort Worth",
+	version => "@@SERIAL@@",
+	priority => "P2",
+	op_sys => "All",
+	platform => "All",
+	severity => "normal",
+	summary => "On-Site Maintenance - @@SERIAL@@ - @@COMPANY@@ - @@NAME@@",
+	assigned_to => "@@ASSIGNEE@@",
+	comment => "
+Company: @@COMPANY@@
+Name:    @@NAME@@
+
+This customer is on a maintenance plan that includes on-site
+maintenance of their surveillance system to be billed separately.
+Schedule an on-site visit to perform the following list.  When
+closing this ticket, please indication which items you performed
+in the comments section.
+
+All Customers
+1) All shots are clean and adjusted
+2) Playback on all cameras to verify video is recording
+3) PTZ cameras move
+4) License Plate cameras get plates
+5) Check mask file for each camera
+6) Storage is adequate (>=30 days)
+7) DVS system is powered down and cleaned
+ - CPU Fan is taken apart and cleaned
+ - Case fans are all cleaned to ensure proper airflow
+ - Case is wiped down and canned air used to blow dust out
+8) BNC tips are inspected for wear
+9) Breakout cables are inspected for wear
+10) All caulk, junction boxes, housing seals are inspected for wear.
+11) Managers have been given opportunity to suggest adjustments
+
+JWS Customers
+12) Tickets of daytime has legible license plates
+13) Tickets of nightime has legible license plates"
+};

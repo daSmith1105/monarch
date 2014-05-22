@@ -1,0 +1,40 @@
+/*
+ * Copyright information
+ */
+.copyright {
+	font-size: .75em;
+	font-family: Arial, Helvetica, serif;
+	background-color: transparent;
+	color: #000000;
+}
+H1 {
+	font: bold 14px Arial, Helvetica, sans-serif;
+	color: #00729a;
+	text-align: center;
+	text-decoration: underline;
+}
+H2 {
+	font: bold 12px Arial, Helvetica, sans-serif;
+	color: #00729a;
+	text-align: center;
+	text-decoration: none;
+}
+/*
+ * Menu Links
+ */
+A:link {
+	text-decoration: none;
+	color: #00729a;
+}
+A:visited {
+	text-decoration: none;
+	color: #00729a;
+}
+A:active {
+	text-decoration: none;
+	color: #00729a;
+}
+A:hover {
+	text-decoration: overline underline;
+	color: red;
+}

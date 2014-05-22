@@ -1,0 +1,16 @@
+{
+	product => "Support",
+	component => "Fort Worth",
+	version => "@@SERIAL@@",
+	priority => "P1",
+	op_sys => "All", 
+	platform => "All",
+	severity => "normal",
+	summary => "Service - @@NAME@@ - @@SUMMARY@@",
+	assigned_to => "@@ASSIGNEE@@",
+	comment => "
+Company: @@COMPANY@@
+Name:    @@NAME@@
+
+@@DESCRIPTION@@"
+};

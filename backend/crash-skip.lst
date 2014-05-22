@@ -1,0 +1,11 @@
+##
+## crash-skip.lst
+##
+##  This file contains a list of java exceptions we would like to ignore.
+##  These are only skipped if the dview is a remote viewer.  All local dview
+##  exceptions are logged.
+##
+##  Ex: java.lang.OutOfMemoryError
+##
+
+java.lang.OutOfMemoryError
