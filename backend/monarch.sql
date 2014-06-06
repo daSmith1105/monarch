@@ -229,6 +229,33 @@ CREATE TABLE `DVSLog` (
  PRIMARY KEY (`bID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+--
+-- Table structure for table `CustSession`
+--
+
+DROP TABLE IF EXISTS `CustSession`;
+CREATE TABLE `CustSession` (
+  `bSerial` SMALLINT UNSIGNED NOT NULL default '0',
+  `bUserID` BIGINT UNSIGNED NOT NULL UNIQUE,
+  `dLastAccess` DATETIME NOT NULL,
+  `sSessID` VARCHAR(255) NOT NULL default '',
+  UNIQUE `sSessid` (`sSessID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `User`
+--
+
+DROP TABLE IF EXISTS `CustUser`;
+CREATE TABLE `CustUser` (
+  `bSerial` SMALLINT UNSIGNED NOT NULL default '0',
+  `bID` BIGINT UNSIGNED NOT NULL default '0',
+  `sName` VARCHAR(64) NOT NULL default '',
+  `sPassword` VARCHAR(16) default NULL,
+  `sDescription` VARCHAR(64) NOT NULL default '',
+  `bType` TINYINT UNSIGNED NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
