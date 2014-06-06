@@ -36,6 +36,7 @@ import modules.key
 import modules.dvslog
 import modules.crash
 import modules.ticket
+import modules.customer
 
 
 SERVER_PORT = 9000
@@ -125,6 +126,9 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 			return True
 
 		elif sModule == 'modCrash':
+			return True
+
+		elif sModule == 'modCustomer':
 			return True
 
 		return False
@@ -237,6 +241,7 @@ class XmlRpcServer(SocketServer.ThreadingMixIn, SimpleXMLRPCServer.SimpleXMLRPCS
 		libCache.set('modDvslog',modules.dvslog.DVSLog())
 		libCache.set('modCrash',modules.crash.Crash())
 		libCache.set('modTicket', modules.ticket.Ticket())
+		libCache.set('modCustomer', modules.customer.Customer())
 
 		# Hook up Process Control Handlers
 		#libCache.get('modUtil')._controlProcess += self.rgoThread['ProcessControl'].controlProcess
