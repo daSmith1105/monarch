@@ -68,7 +68,11 @@ class Stats:
 			# Find Server object
 			oServer = self._dbServerList.getServer( bSerial=bSerial )
 			if oServer is None:
-				raise Exception, 'unknown serial [%s]' % bSerial
+				if bSerial < 4000:
+					raise Exception, 'unknown serial [%s]' % bSerial
+				else:
+					# This is a devel system, don't log error
+					return rgoResult
 
 			# Append kill status if we intend to kill this DVS (pirate?)
 			if oServer.getKill() != '':
@@ -98,7 +102,7 @@ class Stats:
 			oServer.setTimestamp( time.time() )
 			self._dbServerList.setServer( oServer )
 
-			stdMsg( 'ip updated for serial-[%3s] ip-[%15s] remoteip-[%15s] port-[%4s] controller-[%3s]' % ( bSerial, sIP, sIPLookup, bPort, bSerialController ) )
+			#stdMsg( 'ip updated for serial-[%3s] ip-[%15s] remoteip-[%15s] port-[%4s] controller-[%3s]' % ( bSerial, sIP, sIPLookup, bPort, bSerialController ) )
 
 			return rgoResult
 
@@ -319,7 +323,7 @@ class Stats:
 
 			if not isinstance( rgbCamera, list ):
 				# Old style.  This should be removed after dvs-3.0 comes out and we have time to upgrade all systems.
-				dbgMsg( 'camera failure reported using old style' )
+				#dbgMsg( 'camera failure reported using old style' )
 
 				bCamera = rgbCamera
 				try:
@@ -346,7 +350,7 @@ class Stats:
 
 			else:
 				# New style.  We are only receiving a camera array of failed cameras, all others are expected to be restored.
-				dbgMsg( 'camera failure reported using new style' )
+				#dbgMsg( 'camera failure reported using new style' )
 
 				# Delete all cameras that were not sent to us since they have been restored
 				for ixCam in range( 1, 17 ):

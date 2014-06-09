@@ -8,7 +8,7 @@
 # General
 import time
 # Hashing with controller code
-import md5, pickle
+import pickle
 # Logging
 from messaging import stdMsg, dbgMsg, errMsg, setDebugging
 # Cache
@@ -62,6 +62,13 @@ class Util:
 	def hashObject(self, o):
 		try:
 			# return an md5 hash of the object serialized as a string
+			try:
+				import hashlib
+				m = hashlib.md5()
+			except ImportError:
+				import md5
+				m = md5.new()
+
 			m = md5.new()
 			m.update(pickle.dumps(o))
 			return m.hexdigest()

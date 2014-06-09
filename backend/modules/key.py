@@ -168,6 +168,11 @@ class Key:
 			bSeed = long( bSeed )
 			
 			( bSerial, sVersion, bNumcam, sMac ) = self.decomposeSeed( bSeed )
+
+			# Skip reporting on devel serials
+			if bSerial >= 4000:
+				return ( False, 'Unknown Server' )
+
 			dbgMsg( 'getting key for seed-[%d] serial-[%d] version-[%s] numcam-[%d] mac-[%s]' % ( bSeed, bSerial, sVersion, bNumcam, sMac ) )
 
 			# Make sure this server exists

@@ -40,7 +40,7 @@ import modules.customer
 
 
 SERVER_PORT = 9000
-
+MAGIC = 'dtech'
 
 class ThreadXmlRpc(threading.Thread):
 
@@ -129,7 +129,8 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 			return True
 
 		elif sModule == 'modCustomer':
-			return True
+			if sMethod == 'verifySession':
+				return True
 
 		return False
 
@@ -140,6 +141,16 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 		#	if sMethod == 'addFeature' or \
 		#		 sMethod == 'delFeature':
 		#		return True
+
+		return False
+
+	def _checkMagic( self, sModule, sMethod ):
+		""" See if this is a function protected by magic session. """
+
+		if sModule == 'modCustomer':
+			if sMethod == 'getSyncHash' or \
+				 sMethod == 'setSyncData':
+				return True
 
 		return False
 
@@ -178,6 +189,9 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 				if self._checkPrivate(sModule, sMethod):
 					return (True, 'noauth')
 
+				elif sSessID == MAGIC and self._checkMagic( sModule, sMethod ):
+					pass
+
 				# Okay, just check the session
 				elif not libCache.get('dbSessionList').checkExists(sSessID=sSessID):
 					return (True, 'noauth')
@@ -191,6 +205,13 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 			# Alright, let's call it
 			oFunc = getattr(oModule, sMethod)
 
+			# Skip logging these functions since they are chatty
+			rgsSkipLog = [
+				'stats.updateIP',
+				'stats.cameraFail',
+				'stats.isAlive'
+			]
+
 		except AttributeError, e:
 			# Oops it wasn't found, throw an error
 			sMsg = 'method "%s" is not supported' % sRequest
@@ -201,7 +222,8 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 			return (False, e[0])
 		else:
 			try:
-				dbgMsg('%s called' % sRequest)
+				if sRequest not in rgsSkipLog:
+					dbgMsg('%s called' % sRequest)
 				try:
 					oResult = oFunc(*rgoParam)
 					if sModule == 'modStats':
@@ -212,7 +234,8 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 						return e[0]
 					return (False, e[0])
 			finally:
-				dbgMsg('%s returning' % sRequest)
+				if sRequest not in rgsSkipLog:
+					dbgMsg('%s returning' % sRequest)
 
 
 class XmlRpcServer(SocketServer.ThreadingMixIn, SimpleXMLRPCServer.SimpleXMLRPCServer):

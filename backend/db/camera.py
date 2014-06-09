@@ -172,7 +172,7 @@ class CameraList:
 					oCamera.getCamera()
 				)
 
-				dbgMsg( 'updated camera serial-[%d]' % oCamera.getSerial() )
+				#dbgMsg( 'updated camera serial-[%d]' % oCamera.getSerial() )
 
 			except Exception, e:
 				raise Exception, 'error updating camera [%s]' % e
