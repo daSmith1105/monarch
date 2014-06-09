@@ -38,6 +38,7 @@ dojo.declare(
 		_bPosLock: 0,
 		_sKill: "",
 		_fEnterprise: false,
+		_fAuth: false,
 
 		_bTimeDiffMax: 36000,
 		_bTimeDiffRefreshList: 3600, // 1 hour
@@ -115,6 +116,8 @@ dojo.declare(
 					this._sKill = String( rgsServer[ sKey ] );
 				else if ( sKey == "fEnterprise" )
 					this._fEnterprise = new Boolean( rgsServer[ sKey ] );
+				else if ( sKey == "fAuth" )
+					this._fAuth = new Boolean( rgsServer[ sKey ] );
 			}
 
 			// Store this load time as our last server sync time
@@ -156,6 +159,7 @@ dojo.declare(
 			rgs[ "bPosLock" ] = this._bPosLock;
 			rgs[ "sKill" ] = this._sKill;
 			rgs[ "fEnterprise" ] = this._fEnterprise;
+			rgs[ "fAuth" ] = this._fAuth;
 
 			return rgs;
 		},
@@ -431,6 +435,15 @@ dojo.declare(
 		setEnterprise: function( fEnterprise )
 		{
 			this._fEnterprise = fEnterprise;
+		},
+
+		checkHasAuth: function()
+		{
+			return ( this._fAuth == true ) ? true : false;
+		},
+		setAuth: function( fAuth )
+		{
+			this._fAuth = fAuth;
 		},
 
 		getServerSyncLast: function()

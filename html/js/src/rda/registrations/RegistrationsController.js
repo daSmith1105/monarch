@@ -596,6 +596,9 @@ dojo.declare(
 			if ( oServer.checkHasEnterprise() != oView.checkHasEnterprise() )
 				return true;
 
+			if ( oServer.checkHasAuth() != oView.checkHasAuth() )
+				return true;
+
 			return false;
 		},
 
@@ -642,6 +645,7 @@ dojo.declare(
 			oServer.setPosLock( oView.getPosLock() );
 			oServer.setMac( oView.getMac() );
 			oServer.setEnterprise( oView.checkHasEnterprise() );
+			oServer.setAuth( oView.checkHasAuth() );
 
 			this.oServerCurr = oServer;
 			this.oServerModel.setServer( this.oServerCurr );

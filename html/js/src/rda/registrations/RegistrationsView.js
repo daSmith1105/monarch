@@ -84,6 +84,7 @@ dojo.declare(
 		btnKillHard: null,
 		btnKillSoft: null,
 		btnEnterprise: null,
+		btnAuth: null,
 		pVersionInstalled: null,
 		entSummary: null,
 		entDesc: null,
@@ -730,6 +731,8 @@ dojo.declare(
 
 			this.softUpdate( fSoftUpdate, this.entPreferred, oServerPrev != null ? oServerPrev.getPreferred() : null, oServer.getPreferred() );
 
+			this.softUpdateBoolean( fSoftUpdate, this.btnAuth, oServerPrev != null ? oServerPrev.checkHasAuth() : null, oServer.checkHasAuth() );
+
 			// Product Key
 			this.softUpdate( fSoftUpdate, this.entKey, oServerPrev != null ? oServerPrev.getKey() : null, oServer.getKey() );
 
@@ -875,6 +878,10 @@ dojo.declare(
 		checkHasEnterprise: function()
 		{
 			return this.btnEnterprise.checked;
+		},
+		checkHasAuth: function()
+		{
+			return this.btnAuth.checked;
 		},
 		getSummary: function()
 		{
