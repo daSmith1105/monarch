@@ -502,6 +502,10 @@ class ServerList:
 						oServer.getSerial()
 					)
 
+					# Detect if we removed Auth flag and remove users from database
+					if not oServer.checkHasAuth() and oServerEntry.checkHasAuth():
+						self._libDB.query( 'DELETE FROM CustUser WHERE bSerial=%s', oServer.getSerial() )
+
 					#dbgMsg( 'updated server serial-[%d]' % oServer.getSerial() )
 					return
 
@@ -579,6 +583,10 @@ class ServerList:
 					return False
 
 				self._libDB.query( 'DELETE FROM Server WHERE bSerial=%s', oServer.getSerial() )
+
+				# Detect if we removed Auth flag and remove users from database
+				if oServer.checkHasAuth():
+					self._libDB.query( 'DELETE FROM CustUser WHERE bSerial=%s', oServer.getSerial() )
 
 				dbgMsg( 'deleted server serial-[%d]' % oServer.getSerial() )
 				return True

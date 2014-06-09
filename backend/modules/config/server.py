@@ -83,6 +83,8 @@ class Server:
 			if rgsServer['sKill'] is None: rgsServer['sKill'] = ''
 			rgsServer['fEnterprise'] = oServer.checkHasEnterprise()
 			if rgsServer['fEnterprise'] is None: rgsServer['fEnterprise'] = False
+			rgsServer['fAuth'] = oServer.checkHasAuth()
+			if rgsServer['fAuth'] is None: rgsServer['fAuth'] = False
 
 			return rgsServer
 
@@ -121,6 +123,7 @@ class Server:
 			oServer.setPosLock(rgsServer['bPosLock'])
 			oServer.setKill(rgsServer['sKill'])
 			oServer.setEnterprise(rgsServer['fEnterprise'])
+			oServer.setAuth(rgsServer['fAuth'])
 
 			return oServer
 
