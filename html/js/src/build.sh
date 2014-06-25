@@ -3,7 +3,7 @@
 CDIR=$(pwd)
 BASE=/var/www/dividia.net-sub/monarch
 if [ ! -d ${BASE} ] ; then
-	if [ -d /rda/devel/trunk/monarch ] ; then
+	if [ -d /rda/devel/trunk/other/monarch ] ; then
 		BASE=/var/www/html
 	else
 		echo "${BASE} not found!"
