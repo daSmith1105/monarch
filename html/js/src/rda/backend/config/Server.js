@@ -22,6 +22,7 @@ dojo.declare(
 		_sLocalIP: "",
 		_bPort: 0,
 		_bSshPort: 0,
+		_sHostname: '',
 		_bTimestamp: 0,
 		_bInstall: 0,
 		_sMaintenance: "",
@@ -84,6 +85,8 @@ dojo.declare(
 					this._bPort = parseInt( rgsServer[ sKey ] );
 				else if ( sKey == "bSshPort" )
 					this._bSshPort = parseInt( rgsServer[ sKey ] );
+				else if ( sKey == "sHostname" )
+					this._sHostname = String( rgsServer[ sKey ] );
 				else if ( sKey == "bTimestamp" )
 					this._bTimestamp = parseInt( rgsServer[ sKey ] );
 				else if ( sKey == "bInstall" )
@@ -143,6 +146,7 @@ dojo.declare(
 			rgs[ "sLocalIP" ] = this._sLocalIP;
 			rgs[ "bPort" ] = this._bPort;
 			rgs[ "bSshPort" ] = this._bSshPort;
+			rgs[ "sHostname" ] = this._sHostname;
 			rgs[ "bTimestamp" ] = this._bTimestamp;
 			rgs[ "bInstall" ] = this._bInstall;
 			rgs[ "sMaintenance" ] = this._sMaintenance;
@@ -261,6 +265,15 @@ dojo.declare(
 		setSshPort: function( bSshPort )
 		{
 			this._bSshPort = bSshPort;
+		},
+
+		getHostname: function()
+		{
+			return this._sHostname;
+		},
+		setHostname: function( sHostname )
+		{
+			this._sHostname = sHostname;
 		},
 
 		getTimestamp: function()

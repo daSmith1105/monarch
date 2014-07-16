@@ -566,6 +566,9 @@ dojo.declare(
 			if ( oServer.checkHasSkip() != oView.checkHasSkip() )
 				return true;
 
+			if ( oServer.getHostname() != oView.getHostname() )
+				return true;
+
 			if ( oServer.getCategories() != oView.getCategories() )
 				return true;
 
@@ -635,6 +638,7 @@ dojo.declare(
 			oServer.setMaintenance( oView.getMaintenance() );
 			oServer.setMaintenanceOnsitePretty( oView.getMaintenanceOnsite() );
 			oServer.setSkip( oView.checkHasSkip() );
+			oServer.setHostname( oView.getHostname() );
 			oServer.setCategories( oView.getCategories() );
 			oServer.setPreferred( oView.getPreferred() );
 			oServer.setKill( oView.getKill() );

@@ -73,6 +73,7 @@ dojo.declare(
 		pLocalIP: null,
 		pPort: null,
 		pSshPort: null,
+		entHostname: null,
 		entCategories: null,
 		entPreferred: null,
 		entKey: null,
@@ -727,6 +728,8 @@ dojo.declare(
 				this.pSshPort.removeChild( this.pSshPort.childNodes[ 0 ] )
 			this.pSshPort.appendChild( document.createTextNode( oServer.getSshPort() ) );
 
+			this.softUpdate( fSoftUpdate, this.entHostname, oServerPrev != null ? oServerPrev.getHostname() : null, oServer.getHostname() );
+
 			this.softUpdate( fSoftUpdate, this.entCategories, oServerPrev != null ? oServerPrev.getCategories() : null, oServer.getCategories() );
 
 			this.softUpdate( fSoftUpdate, this.entPreferred, oServerPrev != null ? oServerPrev.getPreferred() : null, oServer.getPreferred() );
@@ -834,6 +837,10 @@ dojo.declare(
 		checkHasSkip: function()
 		{
 			return this.btnSkip.checked;
+		},
+		getHostname: function()
+		{
+			return this.entHostname.value;
 		},
 		getCategories: function()
 		{
