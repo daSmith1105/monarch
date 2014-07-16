@@ -51,6 +51,8 @@ class Server:
 			if rgsServer['bPort'] is None: rgsServer['bPort'] = 80
 			rgsServer['bSshPort'] = oServer.getSshPort()
 			if rgsServer['bSshPort'] is None: rgsServer['bSshPort'] = 80
+			rgsServer['sHostname'] = oServer.getHostname()
+			if rgsServer['sHostname'] is None: rgsServer['sHostname'] = ''
 			rgsServer['bTimestamp'] = oServer.getTimestamp()
 			if rgsServer['bTimestamp'] is None: rgsServer['bTimestamp'] = 0
 			rgsServer['bInstall'] = oServer.getInstall()
@@ -107,6 +109,7 @@ class Server:
 			oServer.setLocalIP(rgsServer['sLocalIP'])
 			oServer.setPort(rgsServer['bPort'])
 			oServer.setSshPort(rgsServer['bSshPort'])
+			oServer.setHostname(rgsServer['sHostname'])
 			oServer.setTimestamp(rgsServer['bTimestamp'])
 			oServer.setInstall(rgsServer['bInstall'])
 			oServer.setMaintenance(rgsServer['sMaintenance'])

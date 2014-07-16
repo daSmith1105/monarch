@@ -121,6 +121,7 @@ CREATE TABLE `Server` (
   `sLocalIP` VARCHAR(15) NOT NULL default '127.0.0.1',
   `bPort` SMALLINT UNSIGNED NOT NULL default 80,
   `bSshPort` SMALLINT UNSIGNED NOT NULL default 22,
+	`sHostname` VARCHAR(64) NOT NULL default '',
   `dTimestamp` DATETIME,
   `dInstall` DATE,
   `sMaintenance` VARCHAR(16) NOT NULL default 'install',
@@ -137,6 +138,7 @@ CREATE TABLE `Server` (
   `bPos` TINYINT(1) NOT NULL default '0',
   `sKill` VARCHAR(8) NOT NULL default '',
   `fEnterprise` BOOLEAN NOT NULL default '0',
+  `fAuth` BOOLEAN NOT NULL default '0',
   PRIMARY KEY  (`bSerial`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
@@ -146,11 +148,11 @@ CREATE TABLE `Server` (
 
 /*!40000 ALTER TABLE `Server` DISABLE KEYS */;
 LOCK TABLES `Server` WRITE;
-INSERT INTO `Server` VALUES (1,'International Plaza','DVS16 - Cameras 1-16','video,bobbycox,ip,demo','ip','216.195.99.67','216.195.99.67','127.0.0.1',8080,22,NOW(),'2002-09-01','plan1','2009-01-01',FALSE,'3.0',16,'','','',FALSE);
-INSERT INTO `Server` VALUES (2,'Rosa\'s Cafe','Rosa\'s Cafe #16','video,bobbycox,rosas','rosas','65.66.116.234','65.66.116.234','127.0.0.1',8080,22,NOW(),'2002-09-01','plan1','2009-01-01',FALSE,'3.0',16,'','','',FALSE);
-INSERT INTO `Server` VALUES (3,'Ronny Jordan','Ronny\'s Ranch','video,bobbycox,ronny','ronny','69.19.0.1','69.19.0.1','127.0.0.1',80,22,'2006-04-05 16:00:00','2007-03-06','free','2009-01-01',TRUE,'3.0',4,'','','',FALSE);
-INSERT INTO `Server` VALUES (4,'Casters of Fort Worth','Ace Warehouse','video,ace','ace','68.89.124.38','68.89.124.38','127.0.0.1',80,22,'2006-05-30 09:36:54','2007-03-06','no','2009-01-01',FALSE,'2.5',0,'','','',FALSE);
-INSERT INTO `Server` VALUES (5,'United Texas Entertainment','Blockbuster #34','video,bobbycox,ute,blockbuster','ute','208.180.246.43','208.180.246.43','127.0.0.1',80,22,NOW(),'2002-09-01','plan1','2009-01-01',FALSE,'3.0',8,'','','',FALSE);
+INSERT INTO `Server` VALUES (1,'International Plaza','DVS16 - Cameras 1-16','video,bobbycox,ip,demo','ip','216.195.99.67','216.195.99.67','127.0.0.1',8080,22,'',NOW(),'2002-09-01','plan1','2009-01-01',FALSE,'3.0',16,'','','',FALSE,FALSE);
+INSERT INTO `Server` VALUES (2,'Rosa\'s Cafe','Rosa\'s Cafe #16','video,bobbycox,rosas','rosas','65.66.116.234','65.66.116.234','127.0.0.1',8080,22,'',NOW(),'2002-09-01','plan1','2009-01-01',FALSE,'3.0',16,'','','',FALSE,FALSE);
+INSERT INTO `Server` VALUES (3,'Ronny Jordan','Ronny\'s Ranch','video,bobbycox,ronny','ronny','69.19.0.1','69.19.0.1','127.0.0.1',80,22,'','2006-04-05 16:00:00','2007-03-06','free','2009-01-01',TRUE,'3.0',4,'','','',FALSE,FALSE);
+INSERT INTO `Server` VALUES (4,'Casters of Fort Worth','Ace Warehouse','video,ace','ace','68.89.124.38','68.89.124.38','127.0.0.1',80,22,'','2006-05-30 09:36:54','2007-03-06','no','2009-01-01',FALSE,'2.5',0,'','','',FALSE,FALSE);
+INSERT INTO `Server` VALUES (5,'United Texas Entertainment','Blockbuster #34','video,bobbycox,ute,blockbuster','ute','208.180.246.43','208.180.246.43','127.0.0.1',80,22,'',NOW(),'2002-09-01','plan1','2009-01-01',FALSE,'3.0',8,'','','',FALSE,FALSE);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `Server` ENABLE KEYS */;
 
