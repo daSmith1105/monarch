@@ -107,7 +107,9 @@ class ThreadBugzilla( threading.Thread ):
 
 				# On-Site Maintenance
 				# Open Monthly/Quarterly/Bi-Annual On-site Tickets
-				self._processOnsiteMaintTickets()
+				# 06/24/2014 Temprarily Disable Opening these.
+				# I'm trying a new process where I have all maintenance events pre-laoded on calendar.
+				#self._processOnsiteMaintTickets()
 
 				# Resolved Reminder
 				# Send a reminder email on tickets marked as RESOLVED but not FIXED
