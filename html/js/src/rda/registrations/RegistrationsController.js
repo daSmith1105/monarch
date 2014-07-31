@@ -485,7 +485,7 @@ dojo.declare(
 
 			// Range check variables
 			if ( ( bSerial < 1 || bSerial > 4096 ) ||
-			     ( sVersion != "2.0" && sVersion != "2.5" && sVersion != "3.0" && sVersion != "3.1" && sVersion != "3.2" && sVersion != "3.3" ) ||
+			     ( sVersion != "2.0" && sVersion != "2.5" && sVersion != "3.0" && sVersion != "3.1" && sVersion != "3.2" && sVersion != "3.3" && sVersion != "3.4" ) ||
 			     ( bNumcam != 4 && bNumcam != 8 && bNumcam != 16 ) ||
 			     ( parseInt( sMac, 16 ) > 255 ) ) {
 				this.oView.promptSeedInvalid();
