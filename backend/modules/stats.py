@@ -171,7 +171,13 @@ class Stats:
 					if rgoResult is not None:
 						bProduct = int( rgoResult[ 0 ][ 0 ] )
 						sSerial = '%03d' % bSerial
-						self._libDBbug.query( 'INSERT INTO versions (value, product_id) VALUES (%s, %s)', sSerial, bProduct )
+						# Loop here to make sure it gets added
+						for ix in range( 0, 5 ):
+							self._libDBbug.query( 'INSERT INTO versions (value, product_id) VALUES (%s, %s)', sSerial, bProduct )
+							rgoResult = self._libDBbug.query( 'SELECT value FROM versions WHERE product_id=%s AND value=%s', bProduct, sSerial )
+							if rgoResult is not None and len( rgoResult ) > 0:
+								stdMsg( 'added new serial to Bugzilla [%s]' % sSerial )
+								break
 
 				except Exception, e:
 					errMsg( 'error adding serial to Bugzilla' )
