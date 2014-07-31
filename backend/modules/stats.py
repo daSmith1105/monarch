@@ -142,9 +142,9 @@ class Stats:
 
 			bSerial = int( bSerial )
 
-			# Block any >=900 serial since these are currently used as development systems and shouldn't be in the DB
-			if bSerial >= 3999:
-				dbgMsg( 'blocking newserver call for development serial >= 3999 [%s]' % sIP )
+			# Block any >= 4000 serial since these are currently used as development systems and shouldn't be in the DB
+			if bSerial >= 4000:
+				dbgMsg( 'blocking newserver call for development serial >= 4000 [%s]' % sIP )
 				return False
 
 			oServer = self._dbServerList.getServer( bSerial=bSerial )
