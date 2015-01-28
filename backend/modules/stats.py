@@ -23,6 +23,11 @@ class Stats:
 		self._libDBbug = libCache.get( 'libDBbug' )
 		self._oLock = threading.RLock()
 
+		# Should we run in offline mode?
+		self._fOffline = False
+		if os.access( '/rda/devel', os.F_OK ):
+			self._fOffline = True
+
 	def iplist( self, sName, sPass, fForce=False ):
 		""" List all servers """
 
@@ -309,6 +314,10 @@ class Stats:
 				return ( False, 'error verifying version' )
 
 			# Alright, they are eligible so attempt repo update
+			if self._fOffline:
+				dbgMsg( 'running in offline mode, skipping' )
+				return ( True, '' )
+
 			os.system( 'ssh webhost.dividia.net "/usr/local/bin/add_id.sh %s %s %s 1>/dev/null 2>/dev/null"' % ( bSerial, sOS, sVersionRepo ) )
 
 			return ( True, '' )

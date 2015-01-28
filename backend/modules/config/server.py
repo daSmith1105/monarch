@@ -87,6 +87,10 @@ class Server:
 			if rgsServer['fEnterprise'] is None: rgsServer['fEnterprise'] = False
 			rgsServer['fAuth'] = oServer.checkHasAuth()
 			if rgsServer['fAuth'] is None: rgsServer['fAuth'] = False
+			rgsServer['sSeed'] = oServer.getSeed()
+			if rgsServer['sSeed'] is None: rgsServer['sSeed'] = ''
+			rgsServer['sFeatures'] = oServer.getFeatures()
+			if rgsServer['sFeatures'] is None: rgsServer['sFeatures'] = ''
 
 			return rgsServer
 
@@ -127,6 +131,8 @@ class Server:
 			oServer.setKill(rgsServer['sKill'])
 			oServer.setEnterprise(rgsServer['fEnterprise'])
 			oServer.setAuth(rgsServer['fAuth'])
+			oServer.setSeed(rgsServer['sSeed'])
+			oServer.setFeatures(rgsServer['sFeatures'])
 
 			return oServer
 

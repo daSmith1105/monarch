@@ -20,7 +20,7 @@ class ServerEntry:
 
 	_bTimeDiffMax = 36000
 
-	def __init__( self, bSerial=None, sCompany='Test', sName='Test', sCategories='test', sPreferred='test', sIP='127.0.0.1', sRemoteIP='127.0.0.1', sLocalIP='127.0.0.1', bPort=80, bSshPort=22, sHostname='', bTimestamp=None, bInstall=None, sMaintenance='install', bMaintenanceOnsite=None, fSkip=False, fSick=False, bController=0, sOS='', sVersionInstalled='', sVersion='3.0', bNumcam=0, sMac='', sKey='', sPosKey='', bPosLock=0, sKill='', fEnterprise=False, fAuth=False ):
+	def __init__( self, bSerial=None, sCompany='Test', sName='Test', sCategories='test', sPreferred='test', sIP='127.0.0.1', sRemoteIP='127.0.0.1', sLocalIP='127.0.0.1', bPort=80, bSshPort=22, sHostname='', bTimestamp=None, bInstall=None, sMaintenance='install', bMaintenanceOnsite=None, fSkip=False, fSick=False, bController=0, sOS='', sVersionInstalled='', sVersion='3.0', bNumcam=0, sMac='', sKey='', sPosKey='', bPosLock=0, sKill='', fEnterprise=False, fAuth=False, sSeed='', sFeatures='' ):
 		""" Setup Server Object for a certain server """
 
 		self._bSerial = bSerial
@@ -60,6 +60,8 @@ class ServerEntry:
 		self._fAuth = False
 		if fAuth:
 			self._fAuth = True
+		self._sSeed = sSeed
+		self._sFeatures = sFeatures
 
 	def getSerial( self ):
 		""" Return Serial associated with this server. """
@@ -335,6 +337,22 @@ class ServerEntry:
 		if fAuth:
 			self._fAuth = True
 
+	def getSeed( self ):
+		""" Return Seed for server. """
+		return self._sSeed
+
+	def setSeed( self, sSeed ):
+		""" Set new Seed. """
+		self._sSeed = sSeed
+
+	def getFeatures( self ):
+		""" Return Features for server. """
+		return self._sFeatures
+
+	def setFeatures( self, sFeatures ):
+		""" Set new Features. """
+		self._sFeatures = sFeatures
+
 
 class ServerList:
 	"""
@@ -365,7 +383,7 @@ class ServerList:
 			try:
 				rgoServer = []
 
-				rgoResult = self._libDB.query( 'SELECT bSerial, sCompany, sName, sCategories, sPreferred, sIP, sRemoteIP, sLocalIP, bPort, bSshPort, sHostname, UNIX_TIMESTAMP(dTimestamp), UNIX_TIMESTAMP(dInstall), sMaintenance, UNIX_TIMESTAMP(dMaintenanceOnsite), fSkip, fSick, bController, sOS, sVersionInstalled, sVersion, bNumcam, sMac, sKey, sKeyPos, bPos, sKill, fEnterprise, fAuth FROM Server ORDER BY bSerial' )
+				rgoResult = self._libDB.query( 'SELECT bSerial, sCompany, sName, sCategories, sPreferred, sIP, sRemoteIP, sLocalIP, bPort, bSshPort, sHostname, UNIX_TIMESTAMP(dTimestamp), UNIX_TIMESTAMP(dInstall), sMaintenance, UNIX_TIMESTAMP(dMaintenanceOnsite), fSkip, fSick, bController, sOS, sVersionInstalled, sVersion, bNumcam, sMac, sKey, sKeyPos, bPos, sKill, fEnterprise, fAuth, sSeed, sFeatures FROM Server ORDER BY bSerial' )
 
 				for oRow in rgoResult:
 					rgoServer.append(
@@ -398,7 +416,9 @@ class ServerList:
 							oRow[25],
 							oRow[26],
 							oRow[27],
-							oRow[28]
+							oRow[28],
+							oRow[29],
+							oRow[30]
 						)
 					)
 
@@ -419,7 +439,7 @@ class ServerList:
 			try:
 				rgoResult = ()
 
-				sQuery = 'SELECT bSerial, sCompany, sName, sCategories, sPreferred, sIP, sRemoteIP, sLocalIP, bPort, bSshPort, sHostname, UNIX_TIMESTAMP(dTimestamp), UNIX_TIMESTAMP(dInstall), sMaintenance, UNIX_TIMESTAMP(dMaintenanceOnsite), fSkip, fSick, bController, sOS, sVersionInstalled, sVersion, bNumcam, sMac, sKey, sKeyPos, bPos, sKill, fEnterprise, fAuth FROM Server WHERE '
+				sQuery = 'SELECT bSerial, sCompany, sName, sCategories, sPreferred, sIP, sRemoteIP, sLocalIP, bPort, bSshPort, sHostname, UNIX_TIMESTAMP(dTimestamp), UNIX_TIMESTAMP(dInstall), sMaintenance, UNIX_TIMESTAMP(dMaintenanceOnsite), fSkip, fSick, bController, sOS, sVersionInstalled, sVersion, bNumcam, sMac, sKey, sKeyPos, bPos, sKill, fEnterprise, fAuth, sSeed, sFeatures FROM Server WHERE '
 				if bSerial is not None:
 					sQuery += 'bSerial=%s'
 					rgoResult = self._libDB.query( sQuery, bSerial )
@@ -462,7 +482,9 @@ class ServerList:
 					oRow[25],
 					oRow[26],
 					oRow[27],
-					oRow[28]
+					oRow[28],
+					oRow[29],
+					oRow[30]
 				)
 
 				return copy.copy( oServerEntry )
@@ -482,7 +504,7 @@ class ServerList:
 			try:
 				oServerEntry = self.getServer( bSerial=oServer.getSerial() )
 				if oServerEntry is not None:
-					self._libDB.query( 'UPDATE Server SET sCompany=%s, sName=%s, sCategories=%s, sPreferred=%s, sIP=%s, sRemoteIP=%s, sLocalIP=%s, bPort=%s, bSshPort=%s, sHostname=%s, dTimestamp=FROM_UNIXTIME(%s), dInstall=FROM_UNIXTIME(%s), sMaintenance=%s, dMaintenanceOnsite=FROM_UNIXTIME(%s), fSkip=%s, fSick=%s, bController=%s, sOS=%s, sVersionInstalled=%s, sVersion=%s, bNumcam=%s, sMac=%s, sKey=%s, sKeyPos=%s, bPos=%s, sKill=%s, fEnterprise=%s, fAuth=%s WHERE bSerial=%s',
+					self._libDB.query( 'UPDATE Server SET sCompany=%s, sName=%s, sCategories=%s, sPreferred=%s, sIP=%s, sRemoteIP=%s, sLocalIP=%s, bPort=%s, bSshPort=%s, sHostname=%s, dTimestamp=FROM_UNIXTIME(%s), dInstall=FROM_UNIXTIME(%s), sMaintenance=%s, dMaintenanceOnsite=FROM_UNIXTIME(%s), fSkip=%s, fSick=%s, bController=%s, sOS=%s, sVersionInstalled=%s, sVersion=%s, bNumcam=%s, sMac=%s, sKey=%s, sKeyPos=%s, bPos=%s, sKill=%s, fEnterprise=%s, fAuth=%s, sSeed=%s, sFeatures=%s WHERE bSerial=%s',
 						oServer.getCompany(),
 						oServer.getName(),
 						oServer.getCategories(),
@@ -511,6 +533,8 @@ class ServerList:
 						oServer.getKill(),
 						oServer.checkHasEnterprise(),
 						oServer.checkHasAuth(),
+						oServer.getSeed(),
+						oServer.getFeatures(),
 						oServer.getSerial()
 					)
 
@@ -523,7 +547,7 @@ class ServerList:
 
 				# Server does not exist, so add them
 				# This is used by controller syncing
-				self._libDB.query( 'INSERT INTO Server (bSerial,sCompany,sName,sCategories,sPreferred,sIP,sRemoteIP,sLocalIP,bPort,bSshPort,sHostname,dTimestamp,dInstall,sMaintenance,dMaintenanceOnsite,fSkip,fSick,bController,sOS,sVersionInstalled,sVersion,bNumcam,sMac,sKey,sKeyPos,bPos,sKill,fEnterprise,fAuth) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s),FROM_UNIXTIME(%s),%s,FROM_UNIXTIME(%s),%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
+				self._libDB.query( 'INSERT INTO Server (bSerial,sCompany,sName,sCategories,sPreferred,sIP,sRemoteIP,sLocalIP,bPort,bSshPort,sHostname,dTimestamp,dInstall,sMaintenance,dMaintenanceOnsite,fSkip,fSick,bController,sOS,sVersionInstalled,sVersion,bNumcam,sMac,sKey,sKeyPos,bPos,sKill,fEnterprise,fAuth,sSeed,sFeatures) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,FROM_UNIXTIME(%s),FROM_UNIXTIME(%s),%s,FROM_UNIXTIME(%s),%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',
 					oServer.getSerial(),
 					oServer.getCompany(),
 					oServer.getName(),
@@ -552,7 +576,9 @@ class ServerList:
 					oServer.getPosLock(),
 					oServer.getKill(),
 					oServer.checkHasEnterprise(),
-					oServer.checkHasAuth()
+					oServer.checkHasAuth(),
+					oServer.getSeed(),
+					oServer.getFeatures()
 				)
 				dbgMsg( 'added server serial-[%d]' % oServer.getSerial() )
 

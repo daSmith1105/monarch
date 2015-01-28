@@ -1,18 +1,27 @@
 This document describes how to bootstrap a test Monarch system.
 
+* If this is being setup on an existing DVS devel system, you should probably
+* call setup_develop.sh to unlink our repo.
+
 1) Make sure svn repo exists @ /rda/devel
 2) Create Symlinks
- - Symlink /rda/devel/trunk/monarch/backend /usr/share/monarch-backend
- - Symlink /rda/devel/trunk/monarch/html /var/www/html/monarch
- - Symlink /rda/devel/trunk/monarch/helper/monarch-backend.bin
+ - Symlink /rda/devel/trunk/other/monarch/backend /usr/share/monarch-backend
+ - Move /var/www/html /var/www/html.pkg
+ - Symlink /rda/devel/trunk/other/monarch/html /var/www/html
+ - Symlink /rda/devel/trunk/other/monarch/helper/monarch-backend.bin
    /usr/local/bin/monarch-backend
- - Symlink /rda/devel/trunk/monarch/helper/monarch-backend.init
+ - Symlink /rda/devel/trunk/other/monarch/helper/monarch-backend.init
    /etc/init.d/monarch-backend
 3) Create databases
  mysql -p < /rda/devel/trunk/monarch/backend/monarch.sql
  mysql -p < /rda/devel/trunk/monarch/backend/bugs.sql
  mysql -p < /rda/devel/trunk/monarch/backend/price-list.sql
 4) Add the following to /etc/httpd/conf/httpd.conf
+ ### monarch start ###
  ProxyPass /MONARCH/ http://127.0.0.1:9000/ retry=5 flushpackets=auto flushwait=10
  ProxyPassReverse /MONARCH/ http://127.0.0.1:9000/
-5) /etc/init.d/monarch-backend start
+ ### monarch end ###
+5) Modify devel system rda-backend to point to us in
+rda-backend/src/globals.py for monarch-backend and monarch-fallback.
+6) yum install python-ldap
+7) /etc/init.d/monarch-backend start

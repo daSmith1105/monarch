@@ -119,7 +119,7 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 		elif sModule == 'modStats':
 			return True
 
-		elif sModule == 'modKey' and sMethod == 'getKey':
+		elif sModule == 'modKey' and ( sMethod == 'getKey' or sMethod == 'getKeyV2' ):
 			return True
 		
 		elif sModule == 'modDvslog':

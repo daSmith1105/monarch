@@ -291,3 +291,12 @@ class Key:
 			errMsg( 'error while getting product key' )
 			errMsg( e )
 			raise Exception, "System error during keying process."
+
+	def getKeyV2( self, sSeed, bSerial=0, bNumcam=0, sFeatures='', bPosLock=0 ):
+		""" New Product Key """
+
+		# TODO: Fix this, for now just return a good pre-made key
+		if bSerial == 4000:
+			return ( True, '837D-2B5D-DB23-7601-9A7C-2349-632F-FBD5' )
+
+		return ( False, 'Unknown Server' )
