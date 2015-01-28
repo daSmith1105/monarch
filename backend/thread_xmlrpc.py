@@ -285,7 +285,7 @@ class XmlRpcServer(SocketServer.ThreadingMixIn, SimpleXMLRPCServer.SimpleXMLRPCS
 		stdMsg( 'reloading configuration' )
 		libCache = lib.cache.Cache()
 		libCache.get('dbPriceList')._load()
-		libCache.get('dbDVSLogEntryList')._load()
+		libCache.get('dbDVSLogList')._load()
 
 		# Reload crash report skip list
 		libCache.get( 'modCrash' )._getSkipList()
