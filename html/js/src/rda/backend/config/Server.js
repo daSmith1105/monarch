@@ -40,6 +40,10 @@ dojo.declare(
 		_sKill: "",
 		_fEnterprise: false,
 		_fAuth: false,
+		_sSeed: "",
+		_sFeatures: "",
+		_sPosTypes: "",
+		_bLprLock: 0,
 
 		_bTimeDiffMax: 36000,
 		_bTimeDiffRefreshList: 3600, // 1 hour
@@ -121,6 +125,14 @@ dojo.declare(
 					this._fEnterprise = new Boolean( rgsServer[ sKey ] );
 				else if ( sKey == "fAuth" )
 					this._fAuth = new Boolean( rgsServer[ sKey ] );
+				else if ( sKey == "sSeed" )
+					this._sSeed = String( rgsServer[ sKey ] );
+				else if ( sKey == "sFeatures" )
+					this._sFeatures = String( rgsServer[ sKey ] );
+				else if ( sKey == "sPosTypes" )
+					this._sPosTypes = String( rgsServer[ sKey ] );
+				else if ( sKey == "bLprLock" )
+					this._bLprLock = parseInt( rgsServer[ sKey ] );		
 			}
 
 			// Store this load time as our last server sync time
@@ -164,6 +176,10 @@ dojo.declare(
 			rgs[ "sKill" ] = this._sKill;
 			rgs[ "fEnterprise" ] = this._fEnterprise;
 			rgs[ "fAuth" ] = this._fAuth;
+			rgs[ "sSeed" ] = this._sSeed;
+			rgs[ "sFeatures" ] = this._sFeatures;
+			rgs[ "sPosTypes" ] = this._sPosTypes;
+			rgs[ "bLprLock" ] = this._bLprLock;
 
 			return rgs;
 		},
@@ -457,6 +473,42 @@ dojo.declare(
 		setAuth: function( fAuth )
 		{
 			this._fAuth = fAuth;
+		},
+
+		getSeed: function()
+		{
+			return this._sSeed;
+		},
+		setSeed: function( sSeed )
+		{
+			this._sSeed = sSeed;
+		},
+
+		getFeatures: function()
+		{
+			return this._sFeatures;
+		},
+		setFeatures: function( sFeatures )
+		{
+			this._sFeatures = sFeatures;
+		},
+
+		getPosTypes: function()
+		{
+			return this._sPosTypes;
+		},
+		setPosTypes: function( sPosTypes )
+		{
+			this._sPosTypes = sPosTypes;
+		},
+
+		getLprLock: function()
+		{
+			return this._bLprLock;
+		},
+		setLprLock: function( bLprLock )
+		{
+			this._bLprLock = bLprLock;
 		},
 
 		getServerSyncLast: function()

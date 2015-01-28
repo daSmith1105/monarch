@@ -6,7 +6,7 @@
 # Includes
 #
 # General
-import commands
+import commands, subprocess
 # Logging
 from lib.messaging import stdMsg, dbgMsg, errMsg
 # Internal
@@ -147,15 +147,6 @@ class Key:
 
 		return sKey
 
-	def makeKeyV2( self, sSeed, bSerial = 0, sVersion = "", bNumcam = 0, bPosLock = 0, sFeatures = "", sPosTypes = "", bNumLPRCam = 0 ):
-		""" Make new version 2 product key. """
-
-		sKey = commands.getoutput( '/usr/local/bin/make-key -s %s -n %d -p %d -S %d -V "%s" -F "%s" -P "%s" -L %d -N' % (sSeed, bNumcam, bPosLock, bSerial, sVersion, sFeatures, sPosTypes, bNumLPRCam ))
-		if len( sKey ) != 39:
-			raise Exception, 'make-key did not return a valid key [%s]' % sKey
-
-		return sKey
-	
 	def makeKeyPos( self, bSerial, bPosLock, sMac ):
 		""" Make new product key based on seed. """
 
@@ -231,67 +222,6 @@ class Key:
 			errMsg( e )
 			raise Exception, "System error during keying process."
 
-	def getKeyDVSV2( self, sSeed, bSerial, bNumcam, sFeatures, bPosLock ):
-		""" return Product Key. """
-
-		try:			
-			# Skip reporting on devel serials
-			if bSerial >= 4000:
-				return ( False, 'Unknown Server' )
-
-			dbgMsg( 'getting V2 key for seed-[%d] serial-[%d]' % ( bSeed, bSerial ) )
-
-			if bSerial != 0:
-				# Make sure this server exists
-				oServer = self._dbServerList.getServer( bSerial=bSerial )
-				if oServer is None:
-					dbgMsg( 'server [%d] does not exists?' % bSerial )
-					return ( False, 'Unknown Server' )
-
-				# Make new key if we do not have one
-				if oServer.getKey() == '':
-					# TODO: need to get postypes, and numlprcams from somewhere?
-					sKey = self.makeKeyV2( sSeed, oServer.getSerial(), oServer.getVersion(), oServer.getNumcam(), oServer.getPosLock(), oServer.getFeatures(), sPosTypes = "", bNumLPRCam = 0 )
-					dbgMsg( 'making new V2 key serial-[%d] key-[%s]' % ( bSerial, sKey ) )
-					oServer.setKey( sKey )
-			else:
-				# NOTES: So if bSerial is 0 we allow the DVR to tell us it's features.
-				# If we get feature pos and jws, we only enable JWS PosTypes. If we get feature pos but
-				# no jws feature, we enable all PosTypes except jws.  
-				sPosTypes = ""
-				feats = sFeatures.split(',')
-				if 'pos' in feats:
-					if 'jws' in feats:
-						feats.remove('jws')
-						feats.extend(['jws_anti_theft', 'jws_cloud'])
-						sFeatures = ",".join(feats)
-						sPosTypes = "jws_apex"
-					else:
-						sPosTypes = "aloha,subway,debug,retail_pro,polewatcher,verifone,micros,drb,restaurant_manager,cap_retail,focus_pos,positouch,hme_zoom_drive_timer,tanklogix,ecrs,license_plate_recognition"
-
-				# Make new server
-				oServer = self._dbServerList.addServer()
-				oServer.setNumcam( bNumcam )
-				oserver.setSeed( sSeed )				
-				oserver.setFeatures( sFeatures )				
-				oserver.setPosLock( bPosLock )				
-
-				# Make new key	
-				sKey = self.makeKeyV2( sSeed, oServer.getSerial(), oServer.getVersion(), bNumcam, bPosLock, sFeatures, sPosTypes, bNumLPRCam = 0 )
-				dbgMsg( 'making new V2 key serial-[%d] key-[%s]' % ( bSerial, sKey ) )
-				oServer.setKey( sKey )
-
-			# Save server information back to database in case we changed something, or created a new server
-			self._dbServerList.setServer( oServer )
-
-			dbgMsg( 'serial-[%d] has valid key' % bSerial )
-			return ( True, oServer.getKey() )
-
-		except Exception, e:
-			errMsg( 'error while getting product key' )
-			errMsg( e )
-			raise Exception, "System error during keying process."
-		
 	def getKeyPos( self, bSeed ):
 		""" Decompose Seed and check credentials.  If they match, then return Product Key. """
 
@@ -362,13 +292,129 @@ class Key:
 			errMsg( e )
 			raise Exception, "System error during keying process."
 
-	def getKeyV2( self, sSeed, bSerial=0, bNumcam=0, sFeatures='', bPosLock=0 ):
+	def _getNewFeatures( self, sFeatures ):
+		""" Get feature and pos type list. """
+
+		try:
+			rgsFeature = []
+			rgsPosType = []
+
+			for s in sFeatures.split( ',' ):
+				if s == 'jws':
+					rgsFeature.append( 'pos' )
+					rgsPosType.append( 'jws_apex' )
+				if s == 'lpr':
+					rgsFeature.append( 'lpr' )
+					rgsPosType.append( 'license_plate_recognition' )
+				if s == 'valve' or s == 'scale':
+					rgsFeature.append( 'jws_anti_theft' )
+				if s == 'pos':
+					for sPos in [ 'aloha','subway','debug','retail_pro','polewatcher','verifone','micros','drb','restaurant_manager','cap_retail','focus_pos','positouch','hme_zoom_drive_timer','tanklogix','ecrs' ]:
+						rgsPosType.append( sPos )
+
+				return ( ",".join( rgsFeature ), ",".join( rgsPosType ) )
+
+		except:
+			return ( '', '' )
+
+	def getKeyV2( self, sSeed, bSerial=0, bNumcam=0, sFeatures='', bPosLock=0, sVersion='' ):
 		""" New Product Key """
 
 		try:
-			return self.getKeyDVSV2( sSeed, bSerial, bNumcam, sFeatures, bPosLock )
+			# Skip reporting on devel serials
+			if bSerial >= 4000:
+				return ( False, 'Unknown Server' )
+
+			dbgMsg( 'getting key v2 for seed-[%s]' % sSeed )
+
+			# See if this seed is already assigned
+			oServer = self._dbServerList.getServer( sSeed=sSeed )
+			if oServer is not None:
+				return oServer.getKey()
+
+			# Did not find seed assigned, see if our Serial Hint is available
+			oServer = self._dbServerList.getServer( bSerial=bSerial )
+			if oServer is not None:
+				if oServer.getSeed() == '':
+					# Serial is unlocked, so assign seed and create new key with hints
+					try:
+						( sFeatures, sPosTypes ) = self._getNewFeatures( sFeatures )
+						if oServer.getFeatures() != '':
+							sFeatures = oServer.getFeatures()
+						if oServer.getPosTypes() != '':
+							sPosTypes = oServer.getPosTypes()
+						if oServer.getNumcam() == 0:
+							oServer.setNumcam( bNumcam )
+						sKey = self.makeKeyV2(
+							sSeed,
+							bSerial,
+							oServer.getVersion(),
+							oServer.getNumcam(),
+							bPosLock,
+							oServer.getLprLock(),
+							sFeatures,
+							sPosTypes
+						)
+						oServer.setSeed( sSeed )
+						oServer.setKey( sKey )
+						oServer.setFeatures( sFeatures )
+						oServer.setPosTypes( sPosTypes )
+						oServer.setPosLock( bPosLock )
+						self._dbServerList.setServer( oServer )
+						return ( True, oServer.getKey() )
+
+					except Exception, e:
+						errMsg( 'error creating new key' )
+						errMsg( e )
+						return ( False, 'Cannot make new key' )
+
+				else:
+					return ( False, 'Seed already assigned for serial.' )
+
+			return ( False, 'Unknown Server' )
 
 		except Exception, e:
-			errMsg( 'error while getting product key' )
+			errMsg( 'error while getting product key V2' )
 			errMsg( e )
 			raise Exception, "System error during keying process."
+
+	def makeKeyV2( self, sSeed, bSerial, sVersion, bNumcam, bPosLock, bLprLock, sFeatures, sPosTypes ):
+		""" Make new product key based on seed. """
+
+		rgs = [
+			'/usr/local/bin/make-key',
+			'-s', sSeed,
+			'-n', str( bNumcam ),
+			'-p', str( bPosLock ),
+			'-L', str( bLprLock ),
+			'-S', str( bSerial ),
+			'-V', sVersion,
+			'-F', sFeatures,
+			'-P', sPosTypes
+		]
+		#dbgMsg( 'Making key with command [%s]' % " ".join( rgs ) )
+
+		oCMD = subprocess.Popen(
+			rgs,
+			stdin=subprocess.PIPE,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.STDOUT,
+			shell=False,
+			close_fds=True
+		)
+		sOutput = oCMD.communicate()[ 0 ]
+		bStatus = oCMD.returncode
+
+		#dbgMsg( 'make-key return value [%d]' % bStatus )
+		#dbgMsg( 'make-key return output [%s]' % sOutput )
+
+		if bStatus != 1:
+			raise Exception( 'make-key returned bad exit status' )
+
+		rgsOutput = sOutput.strip().split( '\n' )
+		sKey = rgsOutput[ -1 ].strip()
+
+		if len( sKey ) != 39:
+			raise Exception( 'make-key did not return a valid key [%s]' % sKey )
+
+		return sKey

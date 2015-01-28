@@ -91,6 +91,10 @@ class Server:
 			if rgsServer['sSeed'] is None: rgsServer['sSeed'] = ''
 			rgsServer['sFeatures'] = oServer.getFeatures()
 			if rgsServer['sFeatures'] is None: rgsServer['sFeatures'] = ''
+			rgsServer['sPosTypes'] = oServer.getPosTypes()
+			if rgsServer['sPosTypes'] is None: rgsServer['sPosTypes'] = ''
+			rgsServer['bLprLock'] = oServer.getLprLock()
+			if rgsServer['bLprLock'] is None: rgsServer['bLprLock'] = 0
 
 			return rgsServer
 
@@ -133,6 +137,8 @@ class Server:
 			oServer.setAuth(rgsServer['fAuth'])
 			oServer.setSeed(rgsServer['sSeed'])
 			oServer.setFeatures(rgsServer['sFeatures'])
+			oServer.setPosTypes(rgsServer['sPosTypes'])
+			oServer.setLprLock(rgsServer['bLprLock'])
 
 			return oServer
 
@@ -241,32 +247,60 @@ class Server:
 		try:
 			oServerNew = self._thawServer( rgsServer )
 
-			# See if we need to generate new Key
-			oServer = self._dbServerList.getServer( bSerial=oServerNew.getSerial() )
-			if oServer.getVersion() != oServerNew.getVersion() or \
-			   oServer.getNumcam() != oServerNew.getNumcam() or \
-			   oServer.getMac() != oServerNew.getMac():
-				try:
-					oServerNew.setKey( self._modKey.makeKey(
-						oServerNew.getSerial(),
-						oServerNew.getVersion(),
-						oServerNew.getNumcam(),
-						oServerNew.getMac()
-					) )
-				except Exception, e:
-					oServerNew.setKey( '' )
+			bVersion = float( oServerNew.getVersion() )
+			if bVersion >= 4.0:
+				# Handle new Product Keys
+				oServer = self._dbServerList.getServer( bSerial=oServerNew.getSerial() )
+				if oServer.getVersion() != oServerNew.getVersion() or \
+					 oServer.getNumcam() != oServerNew.getNumcam() or \
+					 oServer.getPosLock() != oServerNew.getPosLock() or \
+					 oServer.getLprLock() != oServerNew.getLprLock() or \
+					 oServer.getFeatures() != oServerNew.getFeatures() or \
+					 oServer.getPosTypes() != oServerNew.getPosTypes() or \
+					 oServer.getSeed() != oServerNew.getSeed():
+					try:
+						oServerNew.setKey( self._modKey.makeKeyV2(
+							oServerNew.getSeed(),
+							oServerNew.getSerial(),
+							oServerNew.getVersion(),
+							oServerNew.getNumcam(),
+							oServerNew.getPosLock(),
+							oServerNew.getLprLock(),
+							oServerNew.getFeatures(),
+							oServerNew.getPosTypes()
+						) )
+					except Exception, e:
+						errMsg( 'error creating new key [%s]' % e )
+						oServerNew.setKey( '' )
 
-			if oServer.getMac() != oServerNew.getMac() or \
-			   oServer.getPosLock() != oServerNew.getPosLock():
-				try:
-					oServerNew.setPosKey( self._modKey.makeKeyPos(
-						oServerNew.getSerial(),
-						oServerNew.getPosLock(),
-						oServerNew.getMac()
-					) )
-				except Exception, e:
-					oServerNew.setPosKey( '' )
-					oServerNew.setPosLock( 0 )
+			else:
+				# Old Product Keys here
+				# See if we need to generate new Key
+				oServer = self._dbServerList.getServer( bSerial=oServerNew.getSerial() )
+				if oServer.getVersion() != oServerNew.getVersion() or \
+					 oServer.getNumcam() != oServerNew.getNumcam() or \
+					 oServer.getMac() != oServerNew.getMac():
+					try:
+						oServerNew.setKey( self._modKey.makeKey(
+							oServerNew.getSerial(),
+							oServerNew.getVersion(),
+							oServerNew.getNumcam(),
+							oServerNew.getMac()
+						) )
+					except Exception, e:
+						oServerNew.setKey( '' )
+
+				if oServer.getMac() != oServerNew.getMac() or \
+					 oServer.getPosLock() != oServerNew.getPosLock():
+					try:
+						oServerNew.setPosKey( self._modKey.makeKeyPos(
+							oServerNew.getSerial(),
+							oServerNew.getPosLock(),
+							oServerNew.getMac()
+						) )
+					except Exception, e:
+						oServerNew.setPosKey( '' )
+						oServerNew.setPosLock( 0 )
 					
 			self._dbServerList.setServer( oServerNew )
 
@@ -280,7 +314,18 @@ class Server:
 		""" Set server in database. """
 
 		try:
-			oServer = self._dbServerList.addServer( bSerial )
+			oServer = self._dbServerList.addServer( bSerial=bSerial )
+			return self._freezeServer( oServer )
+
+		except Exception, e:
+			errMsg( 'error adding server [%s]' % e )
+			raise Exception, 'error adding server'
+
+	def addServerV2( self, sSeed ):
+		""" Add new server in database with Seed. """
+
+		try:
+			oServer = self._dbServerList.addServer( sSeed=sSeed )
 			return self._freezeServer( oServer )
 
 		except Exception, e:

@@ -82,6 +82,10 @@ dojo.declare(
 		entPosKey: null,
 		entPosLock: null,
 		entMac: null,
+		entSeed: null,
+		entFeatures: null,
+		entPosTypes: null,
+		entLprLock: null,
 		btnKillHard: null,
 		btnKillSoft: null,
 		btnEnterprise: null,
@@ -92,6 +96,13 @@ dojo.declare(
 		btnOpen: null,
 		btnMaint: null,
 		tblTicketList: null,
+
+		trPosKey: null,
+		trMac: null,
+		trSeed: null,
+		trFeatures: null,
+		trPosTypes: null,
+		trLprLock: null,
 
 		/**************************************************
 		 * Widget functions
@@ -129,11 +140,8 @@ dojo.declare(
 			this.btnMenuHome = this._createLink( "Home" );
 			this.btnMenuList = this._createLink( "Registrations" );
 
-			// Hook Product Key events
-			dojo.connect( this.cbxVersion, "onchange", this, this.clearKey );
-			dojo.connect( this.cbxNumcam, "onchange", this, this.clearKey );
-			dojo.connect( this.entMac, "onchange", this, this.clearKey );
-			dojo.connect( this.entPosLock, "onchange", this, this.clearKeyPos );
+			// Version 4.0 Product Key
+			dojo.connect( this.cbxVersion, "onchange", this, this.checkVersion );
 		},
 
 		/**
@@ -494,6 +502,10 @@ dojo.declare(
 			else if ( s == 'check distro upgrade maint' )
 				this.throwAction( "list-search-distro-maint" );
 
+			// New Product Key Seed
+			else if ( ( isNaN( b ) || ( String( b ) != s ) ) && ( s.length == 12 ) )
+				this.throwAction( "product-key-seedv2-" + s );
+
 			// String Search (Name, Company)
 			else if ( isNaN( b ) || ( String( b ) != s ) )
 				this.throwAction( "list-search-string-" + s );
@@ -556,6 +568,23 @@ dojo.declare(
 			           " - Version\t\t" + sVersion + "\n" +
 			           " - Numcam\t" + bNumcam + "\n" +
 			           " - Mac\t\t" + sMac;
+
+			return confirm( sMsg );
+		},
+
+		/**
+		 * Ask user if we should add this server to our database.
+		 *
+		 * @param sSeed
+		 *   Product Key Seed we would create for serial
+		 *
+		 * @return True if the user wants to add this server
+		 */
+		promptAddServerV2: function( sSeed )
+		{
+			var sMsg = "Would you like to add this as a new Server?\nIf you would rather assign this to an existing Server,\n" +
+			           "first go to that Serial page then enter this seed there.\n" +
+			           " - Seed\t\t" + sSeed;
 
 			return confirm( sMsg );
 		},
@@ -631,23 +660,29 @@ dojo.declare(
 		 **************************************************/
 
 		/**
-		 * Some part of the Product Key information changed, so
-		 * clear out the existing key so they can rekey.
+		 * Check Version and show appropriate fields for New Product Key
 		 */
-		clearKey: function()
+		checkVersion: function()
 		{
-			this.entKey.value = "";
+			if ( parseInt( this.cbxVersion.value ) >= 4 ) {
+				this.trPosKey.style.display = 'none';
+				this.trMac.style.display = 'none';
+				this.trSeed.style.display = '';
+				this.trFeatures.style.display = '';
+				this.trPosTypes.style.display = '';
+				this.trLprLock.style.display = '';
+
+			} else {
+				this.trPosKey.style.display = '';
+				this.trMac.style.display = '';
+				this.trSeed.style.display = 'none';
+				this.trFeatures.style.display = 'none';
+				this.trPosTypes.style.display = 'none';
+				this.trLprLock.style.display = 'none';
+
+			}
 		},
 
-		/**
-		 * Some part of the Pos Key information changes (POS Lock?), so
-		 * clear out the existing key so they can rekey.
-		 */
-		clearKeyPos: function()
-		{
-			this.entPosKey.value = "";
-		},
-		
 		/**
 		 * Display this server's information to update/change.
 		 *
@@ -748,6 +783,12 @@ dojo.declare(
 			
 			this.softUpdate( fSoftUpdate, this.entMac, oServerPrev != null ? oServerPrev.getMac() : null, oServer.getMac() );
 
+			// New Product Key
+			this.softUpdate( fSoftUpdate, this.entSeed, oServerPrev != null ? oServerPrev.getSeed() : null, oServer.getSeed() );
+			this.softUpdate( fSoftUpdate, this.entFeatures, oServerPrev != null ? oServerPrev.getFeatures() : null, oServer.getFeatures() );
+			this.softUpdate( fSoftUpdate, this.entPosTypes, oServerPrev != null ? oServerPrev.getPosTypes() : null, oServer.getPosTypes() );
+			this.softUpdate( fSoftUpdate, this.entLprLock, oServerPrev != null ? oServerPrev.getLprLock() : null, oServer.getLprLock() );
+
 			while ( this.pVersionInstalled.childNodes.length > 0 )
 				this.pVersionInstalled.removeChild( this.pVersionInstalled.childNodes[ 0 ] )
 			this.pVersionInstalled.appendChild( document.createTextNode(
@@ -756,6 +797,8 @@ dojo.declare(
 				( oServer.getOS() != '' ) ? oServer.getOS() : 'N/A' +
 				']'
 			) );
+
+			this.checkVersion();
 		},
 
 		/**
@@ -873,6 +916,22 @@ dojo.declare(
 		getMac: function()
 		{
 			return this.entMac.value;
+		},
+		getSeed: function()
+		{
+			return this.entSeed.value;
+		},
+		getFeatures: function()
+		{
+			return this.entFeatures.value;
+		},
+		getPosTypes: function()
+		{
+			return this.entPosTypes.value;
+		},
+		getLprLock: function()
+		{
+			return this.entLprLock.value;
 		},
 		getKill: function()
 		{

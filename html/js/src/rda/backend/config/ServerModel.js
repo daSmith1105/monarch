@@ -206,6 +206,22 @@ dojo.declare(
 		},
 
 		/**
+		 * Get a Server Object by Seed
+		 *
+		 * @param bSeed
+		 *  Seed of server to get
+		 *
+		 * @return Server
+		 */
+		getServerBySeed: function( sSeed )
+		{
+			for ( var ix = 0; ix < this._rgoServer.length; ix++ )
+				if ( this._rgoServer[ ix ].getSeed() == sSeed )
+					return this._rgoServer[ ix ];
+			throw new Error( "unknown server seed [" + sSeed + "]" );
+		},
+
+		/**
 		 * Get a Server Object
 		 *
 		 * @return Server
@@ -286,7 +302,34 @@ dojo.declare(
 
 				rgsResult = oServ.Query( "config.server.setServer", this._sSess, oServer.freeze() );
 
-				this._rgoServer.push( new rda.backend.config.Server( rgsResult ) );
+				var oServer = new rda.backend.config.Server( rgsResult );
+				this._rgoServer.push( oServer );
+
+				return oServer;
+
+			} catch ( e ) {
+				console.debug( "Error adding server object" );
+				console.debug( e );
+				throw new Error( "Error adding server information id-[" + bSerial + "]" );
+			}
+		},
+
+		/**
+		 * Add a new Server Object
+		 *
+		 * @param sSeed
+		 *   Seed of server to add
+		 */
+		addServerV2: function( sSeed )
+		{
+			try {
+				var oServ = this._oStore.get( "oServer" );
+				rgsResult = oServ.Query( "config.server.addServerV2", this._sSess, sSeed );
+
+				var oServer = new rda.backend.config.Server( rgsResult );
+				this._rgoServer.push( oServer );
+
+				return oServer;
 
 			} catch ( e ) {
 				console.debug( "Error adding server object" );

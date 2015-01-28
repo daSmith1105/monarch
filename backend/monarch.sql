@@ -131,10 +131,10 @@ CREATE TABLE `Server` (
   `sOS` VARCHAR(3) NOT NULL default '',
   `sVersionInstalled` VARCHAR(8) NOT NULL default '',
 	`bController` SMALLINT UNSIGNED NOT NULL default '0',
-  `sVersion` VARCHAR(3) NOT NULL default '3.1',
+  `sVersion` VARCHAR(3) NOT NULL default '4.0',
   `bNumcam` SMALLINT UNSIGNED NOT NULL default 0,
   `sMac` VARCHAR(2) NOT NULL default '',
-  `sKey` VARCHAR(24) NOT NULL default '',
+  `sKey` VARCHAR(39) NOT NULL default '',
   `sKeyPos` VARCHAR(24) NOT NULL default '',
   `bPos` TINYINT(1) NOT NULL default '0',
   `sKill` VARCHAR(8) NOT NULL default '',
@@ -142,6 +142,8 @@ CREATE TABLE `Server` (
   `fAuth` BOOLEAN NOT NULL default '0',
 	`sSeed` VARCHAR(12) NOT NULL default '',
 	`sFeatures` VARCHAR(255) NOT NULL default '',
+	`sPosTypes` VARCHAR(255) NOT NULL default '',
+  `bLpr` TINYINT(1) NOT NULL default '0',
   PRIMARY KEY  (`bSerial`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
@@ -151,9 +153,9 @@ CREATE TABLE `Server` (
 
 /*!40000 ALTER TABLE `Server` DISABLE KEYS */;
 LOCK TABLES `Server` WRITE;
-INSERT INTO `Server` VALUES (4000,'Test Customer 1','Test DVR 1','video,cust1','cust1','192.168.0.201','192.168.0.201','127.0.0.1',80,22,'',NOW(),'2002-09-01','plan1','2009-01-01',FALSE,FALSE,'','',0,'3.4',16,'','','',0,'',FALSE,FALSE,'','');
-INSERT INTO `Server` VALUES (4001,'Test Customer 1','Test DVR 2','video,cust1','cust1','192.168.0.202','192.168.0.202','127.0.0.1',80,22,'',NOW(),'2002-09-01','plan1','2009-01-01',FALSE,FALSE,'','',0,'3.4',16,'','','',0,'',FALSE,FALSE,'','');
-INSERT INTO `Server` VALUES (4002,'Test Customer 2','Test DVR 3','video,cust2','cust2','192.168.0.203','192.168.0.203','127.0.0.1',80,22,'',NOW(),'2002-09-01','',NULL,FALSE,FALSE,'','',0,'3.4',16,'','','',0,'',FALSE,FALSE,'','');
+INSERT INTO `Server` VALUES (4000,'Test Customer 1','Test DVR 1','video,cust1','cust1','192.168.0.201','192.168.0.201','127.0.0.1',80,22,'',NOW(),'2002-09-01','plan1','2009-01-01',FALSE,FALSE,'','',0,'3.4',16,'','','',0,'',FALSE,FALSE,'','','',0);
+INSERT INTO `Server` VALUES (4001,'Test Customer 1','Test DVR 2','video,cust1','cust1','192.168.0.202','192.168.0.202','127.0.0.1',80,22,'',NOW(),'2002-09-01','plan1','2009-01-01',FALSE,FALSE,'','',0,'3.4',16,'','','',0,'',FALSE,FALSE,'','','',0);
+INSERT INTO `Server` VALUES (4002,'Test Customer 2','Test DVR 3','video,cust2','cust2','192.168.0.203','192.168.0.203','127.0.0.1',80,22,'',NOW(),'2002-09-01','',NULL,FALSE,FALSE,'','',0,'3.4',16,'','','',0,'',FALSE,FALSE,'','','',0);
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `Server` ENABLE KEYS */;
 

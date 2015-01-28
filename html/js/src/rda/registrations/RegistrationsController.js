@@ -153,6 +153,10 @@ dojo.declare(
 				// Handle new Product Key Seed search
 				this.handleKeySeed( parseInt( rgs[ 3 ] ) );
 
+			else if ( ( rgs[ 0 ] == "product" ) && ( rgs[ 1 ] == "key" ) && ( rgs[ 2 ] == "seedv2" ) )
+				// Handle new Product Key Seed search
+				this.handleKeySeedV2( rgs[ 3 ] );
+
 			else if ( ( rgs[ 0 ] == "list" ) && ( rgs[ 1 ] == "search" ) && ( rgs[ 2 ] == "version" ) )
 				// Filter search list by version upgrade status
 				this.filterServerListVersion( rgs[ 3 ] );
@@ -459,7 +463,7 @@ dojo.declare(
 				this.changeTab( "change-tab-info-serial-" + bSerial );
 			} 
 		},
-		
+	
 		/**
 		 * A Product Key Seed was entered.  We can do one of three things with it:
 		 *  - Add new server (serial does not exist)
@@ -533,6 +537,39 @@ dojo.declare(
 			}
 		},
 
+		/**
+		 * A Product Key Seed V2 was entered.  We can do one of three things with it:
+		 *  - Add new server (seed not assigned to any existing system)
+		 *  - Jump string to server page (key exists and matched)
+		 */
+		handleKeySeedV2: function( sSeed )
+		{
+			var oServer = null;
+			try {
+				oServer = this.oServerModel.getServerBySeed( sSeed );
+			} catch ( e ) {}
+
+			// Server does not exist, add?
+			if ( oServer == null ) {
+				if ( this.oView.promptAddServerV2( sSeed ) ) {
+					try {
+						oServer = this.oServerModel.addServerV2( sSeed );
+					} catch ( e ) {
+						console.debug( "Handle Key Seed V2 Error [" + e + "]" );
+						alert( "Error adding server by seed." );
+						return;
+					}
+				}
+			}
+
+			if ( oServer == null ) {
+				alert( 'Cannot add server' );
+				return;
+			}
+
+			this.changeTab( "change-tab-info-serial-" + oServer.getSerial() );
+		},
+
 		/*********************************************
 		 * Server Info Functions
 		 *********************************************/
@@ -596,6 +633,18 @@ dojo.declare(
 			if ( oServer.getMac() != oView.getMac() )
 				return true;
 
+			if ( oServer.getSeed() != oView.getSeed() )
+				return true;
+
+			if ( oServer.getFeatures() != oView.getFeatures() )
+				return true;
+
+			if ( oServer.getPosTypes() != oView.getPosTypes() )
+				return true;
+
+			if ( oServer.getLprLock() != oView.getLprLock() )
+				return true;
+				
 			if ( oServer.checkHasEnterprise() != oView.checkHasEnterprise() )
 				return true;
 
@@ -650,6 +699,10 @@ dojo.declare(
 			oServer.setMac( oView.getMac() );
 			oServer.setEnterprise( oView.checkHasEnterprise() );
 			oServer.setAuth( oView.checkHasAuth() );
+			oServer.setSeed( oView.getSeed() );
+			oServer.setFeatures( oView.getFeatures() );
+			oServer.setPosTypes( oView.getPosTypes() );
+			oServer.setLprLock( oView.getLprLock() );
 
 			this.oServerCurr = oServer;
 			this.oServerModel.setServer( this.oServerCurr );

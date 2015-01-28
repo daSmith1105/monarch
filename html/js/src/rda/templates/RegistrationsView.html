@@ -155,7 +155,7 @@
 						</tr>
 						<tr>
 							<td class="lbl"> DVS Key</td>
-							<td><input type="text" value="" dojoAttachPoint="entKey" size="30" maxlength="24" /></td>
+							<td><input type="text" value="" dojoAttachPoint="entKey" size="45" maxlength="39" readonly /></td>
 						</tr>
 						<tr>
 							<td class="lbl">Version</td>
@@ -168,6 +168,7 @@
 									<option value="3.2">3.2</option>
 									<option value="3.3">3.3</option>
 									<option value="3.4">3.4</option>
+									<option value="4.0">4.0</option>
 								</select>&nbsp;
 								<span dojoAttachPoint="pVersionInstalled"></span>
 							</td>
@@ -177,28 +178,57 @@
 							<td>
 								<select size="1" dojoAttachPoint="cbxNumcam">
 									<option value="0">N/A</option>
+									<option value="1">1</option>
+									<option value="2">2</option>
+									<option value="3">3</option>
 									<option value="4">4</option>
+									<option value="5">5</option>
+									<option value="6">6</option>
+									<option value="7">7</option>
 									<option value="8">8</option>
+									<option value="9">9</option>
+									<option value="10">10</option>
+									<option value="11">11</option>
+									<option value="12">12</option>
+									<option value="13">13</option>
+									<option value="14">14</option>
+									<option value="15">15</option>
 									<option value="16">16</option>
 								</select>
 							</td>
 						</tr>
-						<tr>
+						<!-- Old < 4.0 Product Key -->
+						<tr dojoAttachPoint="trPosKey">
 							<td class="lbl">POS Key</td>
-							<td><input type="text" value="" dojoAttachPoint="entPosKey" size="30" maxlength="24" /></td>
+							<td><input type="text" value="" dojoAttachPoint="entPosKey" size="30" maxlength="24" readonly /></td>
 						</tr>
-						
-						
+						<!-- End Old < 4.0 Product Key -->
 						<tr>
 							<td class="lbl">POS Lock</td>
 							<td><input type="number" min="0" max="255" value="0" dojoAttachPoint="entPosLock" ></td>
 						</tr>
-						​
-						
-						<tr>
+						<tr dojoAttachPoint="trMac">
 							<td class="lbl">Mac</td>
 							<td><input type="text" value="" dojoAttachPoint="entMac" size="30" maxlength="2" /></td>
 						</tr>
+						<!-- New 4.0 Product Key -->
+						<tr dojoAttachPoint="trSeed">
+							<td class="lbl">Seed</td>
+							<td><input type="text" value="" dojoAttachPoint="entSeed" size="20" maxlength="12" /></td>
+						</tr>
+						<tr dojoAttachPoint="trFeatures">
+							<td class="lbl">Features</td>
+							<td><input type="text" value="" dojoAttachPoint="entFeatures" size="32" maxlength="255" /></td>
+						</tr>
+						<tr dojoAttachPoint="trPosTypes">
+							<td class="lbl">Pos Types</td>
+							<td><input type="text" value="" dojoAttachPoint="entPosTypes" size="32" maxlength="255" /></td>
+						</tr>
+						<tr dojoAttachPoint="trLprLock">
+							<td class="lbl">LPR Lock</td>
+							<td><input type="number" min="0" max="255" value="0" dojoAttachPoint="entLprLock" ></td>
+						</tr>
+						<!-- End New 4.0 Product Key -->
 						<tr>
 							<td class="lbl">Kill DVS</td>
 							<td><input type="checkbox" dojoAttachPoint="btnKillHard" /> (hard) <input type="checkbox" dojoAttachPoint="btnKillSoft" /> (soft)</td>
