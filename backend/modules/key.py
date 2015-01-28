@@ -146,6 +146,15 @@ class Key:
 			raise Exception, 'make-key did not return a valid key [%s]' % sKey
 
 		return sKey
+
+	def makeKeyV2( self, sSeed, bSerial = 0, sVersion = "", bNumcam = 0, bPosLock = 0, sFeatures = "", sPosTypes = "", bNumLPRCam = 0 ):
+		""" Make new version 2 product key. """
+
+		sKey = commands.getoutput( '/usr/local/bin/make-key -s %s -n %d -p %d -S %d -V "%s" -F "%s" -P "%s" -L %d -N' % (sSeed, bNumcam, bPosLock, bSerial, sVersion, sFeatures, sPosTypes, bNumLPRCam ))
+		if len( sKey ) != 39:
+			raise Exception, 'make-key did not return a valid key [%s]' % sKey
+
+		return sKey
 	
 	def makeKeyPos( self, bSerial, bPosLock, sMac ):
 		""" Make new product key based on seed. """
@@ -212,6 +221,67 @@ class Key:
 				oServer.setKey( sKey )
 
 			# Save server information back to database in case we changed something
+			self._dbServerList.setServer( oServer )
+
+			dbgMsg( 'serial-[%d] has valid key' % bSerial )
+			return ( True, oServer.getKey() )
+
+		except Exception, e:
+			errMsg( 'error while getting product key' )
+			errMsg( e )
+			raise Exception, "System error during keying process."
+
+	def getKeyDVSV2( self, sSeed, bSerial, bNumcam, sFeatures, bPosLock ):
+		""" return Product Key. """
+
+		try:			
+			# Skip reporting on devel serials
+			if bSerial >= 4000:
+				return ( False, 'Unknown Server' )
+
+			dbgMsg( 'getting V2 key for seed-[%d] serial-[%d]' % ( bSeed, bSerial ) )
+
+			if bSerial != 0:
+				# Make sure this server exists
+				oServer = self._dbServerList.getServer( bSerial=bSerial )
+				if oServer is None:
+					dbgMsg( 'server [%d] does not exists?' % bSerial )
+					return ( False, 'Unknown Server' )
+
+				# Make new key if we do not have one
+				if oServer.getKey() == '':
+					# TODO: need to get postypes, and numlprcams from somewhere?
+					sKey = self.makeKeyV2( sSeed, oServer.getSerial(), oServer.getVersion(), oServer.getNumcam(), oServer.getPosLock(), oServer.getFeatures(), sPosTypes = "", bNumLPRCam = 0 )
+					dbgMsg( 'making new V2 key serial-[%d] key-[%s]' % ( bSerial, sKey ) )
+					oServer.setKey( sKey )
+			else:
+				# NOTES: So if bSerial is 0 we allow the DVR to tell us it's features.
+				# If we get feature pos and jws, we only enable JWS PosTypes. If we get feature pos but
+				# no jws feature, we enable all PosTypes except jws.  
+				sPosTypes = ""
+				feats = sFeatures.split(',')
+				if 'pos' in feats:
+					if 'jws' in feats:
+						feats.remove('jws')
+						feats.extend(['jws_anti_theft', 'jws_cloud'])
+						sFeatures = ",".join(feats)
+						sPosTypes = "jws_apex"
+					else:
+						sPosTypes = "aloha,subway,debug,retail_pro,polewatcher,verifone,micros,drb,restaurant_manager,cap_retail,focus_pos,positouch,hme_zoom_drive_timer,tanklogix,ecrs,license_plate_recognition"
+
+				# Make new server
+				oServer = self._dbServerList.addServer()
+				oServer.setNumcam( bNumcam )
+				oserver.setSeed( sSeed )				
+				oserver.setFeatures( sFeatures )				
+				oserver.setPosLock( bPosLock )				
+
+				# Make new key	
+				sKey = self.makeKeyV2( sSeed, oServer.getSerial(), oServer.getVersion(), bNumcam, bPosLock, sFeatures, sPosTypes, bNumLPRCam = 0 )
+				dbgMsg( 'making new V2 key serial-[%d] key-[%s]' % ( bSerial, sKey ) )
+				oServer.setKey( sKey )
+
+			# Save server information back to database in case we changed something, or created a new server
 			self._dbServerList.setServer( oServer )
 
 			dbgMsg( 'serial-[%d] has valid key' % bSerial )
@@ -295,8 +365,10 @@ class Key:
 	def getKeyV2( self, sSeed, bSerial=0, bNumcam=0, sFeatures='', bPosLock=0 ):
 		""" New Product Key """
 
-		# TODO: Fix this, for now just return a good pre-made key
-		if bSerial == 4000:
-			return ( True, '837D-2B5D-DB23-7601-9A7C-2349-632F-FBD5' )
+		try:
+			return self.getKeyDVSV2( sSeed, bSerial, bNumcam, sFeatures, bPosLock )
 
-		return ( False, 'Unknown Server' )
+		except Exception, e:
+			errMsg( 'error while getting product key' )
+			errMsg( e )
+			raise Exception, "System error during keying process."

@@ -588,13 +588,18 @@ class ServerList:
 		finally:
 			self._oLock.release()
 
-	def addServer( self, bSerial ):
+	def addServer( self, bSerial=None ):
 		""" Create new server entry. """
 
 		try:
 			self._oLock.acquire()
 
 			try:
+				# Hacky auto increment 
+				if bSerial is None:
+					res = self._libDB.query( 'SELECT MAX(bSerial) FROM Server' )
+					bSerial = int( res[0][0] ) + 1
+				 
 				self._libDB.query( 'INSERT INTO Server (bSerial) VALUES (%s)', bSerial )
 
 				oServerEntry = self.getServer( bSerial=bSerial )
