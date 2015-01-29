@@ -26,6 +26,7 @@ dojo.declare(
 		oAuthModel: null,
 		oServerModel: null,
 		oKeyModel: null,
+		oKeyModelV2: null,
 		oTicketModel: null,
 		bSpan: 100,
 		sTabCurr: "list",
@@ -45,12 +46,13 @@ dojo.declare(
 		 * @param oView
 		 *   View for this module in MVC
 		 */
-		constructor: function( oAuthModel, oServerModel, oKeyModel, oTicketModel, oView )
+		constructor: function( oAuthModel, oServerModel, oKeyModel, oKeyModelV2, oTicketModel, oView )
 		{
 			this.oView = oView;
 			this.oAuthModel = oAuthModel;
 			this.oServerModel = oServerModel;
 			this.oKeyModel = oKeyModel;
+			this.oKeyModelV2 = oKeyModelV2;
 			this.oTicketModel = oTicketModel;
 
 			this.oView.addActionListener( this );
@@ -78,6 +80,8 @@ dojo.declare(
 			this.oView.finishLoading();
 			if ( ! this.oServerModel.checkIsLoaded() )
 				this.throwAction( "backend-failed" );
+
+			this.oKeyModelV2.load();
 		},
 
 		/**
@@ -87,6 +91,8 @@ dojo.declare(
 		deactivate: function()
 		{
 			this.changeTab( "change-tab-list" );
+
+			this.oKeyModelV2.reset();
 		},
 
 		/**
@@ -156,6 +162,26 @@ dojo.declare(
 			else if ( ( rgs[ 0 ] == "product" ) && ( rgs[ 1 ] == "key" ) && ( rgs[ 2 ] == "seedv2" ) )
 				// Handle new Product Key Seed search
 				this.handleKeySeedV2( rgs[ 3 ] );
+
+			else if ( ( rgs[ 0 ] == "product" ) && ( rgs[ 1 ] == "key" ) && ( rgs[ 2 ] == "feature" ) && ( rgs[ 3 ] == "add" ) )
+				// Prompt to add new feature to key
+				this.addFeature();
+
+			else if ( ( rgs[ 0 ] == "product" ) && ( rgs[ 1 ] == "key" ) && ( rgs[ 2 ] == "feature" ) && ( rgs[ 3 ] == "remove" ) )
+				// Prompt to remove feature from key
+				this.removeFeature();
+
+			else if ( ( rgs[ 0 ] == "product" ) && ( rgs[ 1 ] == "key" ) && ( rgs[ 2 ] == "postype" ) && ( rgs[ 3 ] == "add" ) )
+				// Prompt to add new pos-type to key
+				this.addPosType();
+
+			else if ( ( rgs[ 0 ] == "product" ) && ( rgs[ 1 ] == "key" ) && ( rgs[ 2 ] == "postype" ) && ( rgs[ 3 ] == "remove" ) )
+				// Prompt to remove pos-type from key
+				this.removePosType();
+
+			else if ( ( rgs[ 0 ] == "product" ) && ( rgs[ 1 ] == "key" ) && ( rgs[ 2 ] == "dialog" ) && ( rgs[ 3 ] == "ok" ) )
+				// Prompt to remove pos-type from key
+				this.handleAddRemove();
 
 			else if ( ( rgs[ 0 ] == "list" ) && ( rgs[ 1 ] == "search" ) && ( rgs[ 2 ] == "version" ) )
 				// Filter search list by version upgrade status
@@ -568,6 +594,84 @@ dojo.declare(
 			}
 
 			this.changeTab( "change-tab-info-serial-" + oServer.getSerial() );
+		},
+
+		addFeature: function()
+		{
+			this.oView.promptAddRemove( 'feature', 'add', this.oView.getFeatures(), this.oKeyModelV2.getFeatures() )
+		},
+
+		removeFeature: function()
+		{
+			this.oView.promptAddRemove( 'feature', 'remove', this.oView.getFeatures(), this.oKeyModelV2.getFeatures() )
+		},
+
+		addPosType: function()
+		{
+			this.oView.promptAddRemove( 'postype', 'add', this.oView.getPosTypes(), this.oKeyModelV2.getPosTypes() )
+		},
+
+		removePosType: function()
+		{
+			this.oView.promptAddRemove( 'postype', 'remove', this.oView.getPosTypes(), this.oKeyModelV2.getPosTypes() )
+		},
+
+		handleAddRemove: function()
+		{
+			this.oView._dlgAddRemove.hide()
+
+			var sType = this.oView.getAddRemoveType();
+			var sValue = this.oView.getAddRemoveValue();
+
+			if ( sValue == '' ) return;
+
+			var rgs = sType.split( '-' );
+			if ( rgs[ 0 ] == 'feature' ) {
+				// Feature
+				if ( rgs[ 1 ] == 'add' ) {
+					var s = this.oView.getFeatures();
+					if ( s != '' )
+						s += ',';
+					s += sValue;
+					this.oView.setFeatures( s );
+
+				} else {
+					var rgs = this.oView.getFeatures().split( ',' );
+					var s = '';
+					for ( var ix = 0; ix < rgs.length; ix++ ) {
+						if ( rgs[ ix ] == sValue ) continue;
+						if ( s != '' )
+							s += ',';
+						s += rgs[ ix ];
+					}
+					this.oView.setFeatures( s );
+
+				}
+
+			} else {
+				// Pos Type
+				if ( rgs[ 1 ] == 'add' ) {
+					var s = this.oView.getPosTypes();
+					if ( s != '' )
+						s += ',';
+					s += sValue;
+					this.oView.setPosTypes( s );
+
+				} else {
+					var rgs = this.oView.getPosTypes().split( ',' );
+					var s = '';
+					for ( var ix = 0; ix < rgs.length; ix++ ) {
+						if ( rgs[ ix ] == sValue ) continue;
+						if ( s != '' )
+							s += ',';
+						s += rgs[ ix ];
+					}
+					this.oView.setPosTypes( s );
+
+				}
+			
+			}
+
 		},
 
 		/*********************************************

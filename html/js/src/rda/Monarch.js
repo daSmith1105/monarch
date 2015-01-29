@@ -15,6 +15,7 @@ dojo.require( "rda.config.Store" );
 dojo.require( "rda.backend.RDAServer" );
 dojo.require( "rda.backend.AuthModel" );
 dojo.require( "rda.backend.KeyModel" );
+dojo.require( "rda.backend.KeyModelV2" );
 dojo.require( "rda.backend.TicketModel" );
 dojo.require( "rda.backend.config.ServerModel" );
 dojo.require( "rda.backend.config.Server" );
@@ -43,6 +44,7 @@ dojo.declare(
 		oScreenPrev: null,
 		oAuthModel: null,
 		oKeyModel: null,
+		oKeyModelV2: null,
 		oTicketModel: null,
 		oServerModel: null,
 		oCameraModel: null,
@@ -81,6 +83,7 @@ dojo.declare(
 
 				this.oAuthModel = new rda.backend.AuthModel();
 				this.oKeyModel = new rda.backend.KeyModel();
+				this.oKeyModelV2 = new rda.backend.KeyModelV2();
 				this.oTicketModel = new rda.backend.TicketModel();
 				this.oServerModel = new rda.backend.config.ServerModel();
 				this.oCameraModel = new rda.backend.config.CameraModel();
@@ -97,7 +100,7 @@ dojo.declare(
 				this.oWelcomeController.addActionListener( this );
 
 				this.oRegistrationsView = new rda.registrations.RegistrationsView();
-				this.oRegistrationsController = new rda.registrations.RegistrationsController( this.oAuthModel, this.oServerModel, this.oKeyModel, this.oTicketModel, this.oRegistrationsView );
+				this.oRegistrationsController = new rda.registrations.RegistrationsController( this.oAuthModel, this.oServerModel, this.oKeyModel, this.oKeyModelV2, this.oTicketModel, this.oRegistrationsView );
 				this.oRegistrationsController.addActionListener( this );
 
 				this.oCameraFailView = new rda.camfail.CameraFailView();
@@ -144,6 +147,7 @@ dojo.declare(
 					//  duration of this login session
 					var sSess = this.oAuthModel.getSession();
 					this.oKeyModel.setSession( sSess );
+					this.oKeyModelV2.setSession( sSess );
 					this.oTicketModel.setSession( sSess );
 					this.oServerModel.setSession( sSess );
 					this.oCameraModel.setSession( sSess );
@@ -154,6 +158,7 @@ dojo.declare(
 					// No longer authenticated
 					//  Unloaded any modules that are in memory
 					this.oKeyModel.reset();
+					this.oKeyModelV2.reset();
 					this.oTicketModel.reset();
 					this.oServerModel.reset();
 					this.oCameraModel.reset();

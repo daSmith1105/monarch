@@ -292,6 +292,21 @@ class Key:
 			errMsg( e )
 			raise Exception, "System error during keying process."
 
+	def _getMajorMinorVersion( self, sVersion ):
+		""" Shorten version to just include major and minor for our check. """
+
+		try:
+			rgs = sVersion.split( '.' )
+			if len( rgs ) == 2:
+				return sVersion
+
+			return rgs[ 0 ] + '.' + rgs[ 1 ]
+
+		except Exception, e:
+			errMsg( 'error getting major.minor version' )
+			errMsg( e )
+			return ''
+
 	def _getNewFeatures( self, sFeatures ):
 		""" Get feature and pos type list. """
 
@@ -306,18 +321,22 @@ class Key:
 				if s == 'lpr':
 					rgsFeature.append( 'lpr' )
 					rgsPosType.append( 'license_plate_recognition' )
-				if s == 'valve' or s == 'scale':
+				if ( s == 'valve' or s == 'scale' ) and ('jws_anti_theft' not in rgsFeature):
 					rgsFeature.append( 'jws_anti_theft' )
+				if s == 'vscale':
+					rgsFeature.append( 'jws_cloud' )
 				if s == 'pos':
 					for sPos in [ 'aloha','subway','debug','retail_pro','polewatcher','verifone','micros','drb','restaurant_manager','cap_retail','focus_pos','positouch','hme_zoom_drive_timer','tanklogix','ecrs' ]:
 						rgsPosType.append( sPos )
 
-				return ( ",".join( rgsFeature ), ",".join( rgsPosType ) )
+			return ( ",".join( rgsFeature ), ",".join( rgsPosType ) )
 
-		except:
+		except Exception, e:
+			errMsg( 'error while mapping old features to new features' )
+			errMsg( e )
 			return ( '', '' )
 
-	def getKeyV2( self, sSeed, bSerial=0, bNumcam=0, sFeatures='', bPosLock=0, sVersion='' ):
+	def getKeyV2( self, sSeed, bSerial=0, sVersion='', bNumcam=0, bPosLock=0, bLprLock=0, sFeatures='' ):
 		""" New Product Key """
 
 		try:
@@ -330,7 +349,24 @@ class Key:
 			# See if this seed is already assigned
 			oServer = self._dbServerList.getServer( sSeed=sSeed )
 			if oServer is not None:
-				return oServer.getKey()
+				if oServer.getKey() != '':
+					return ( True, oServer.getKey() )
+				else:
+					# Shouldn't get here, but somehow our Key was cleared in database, but we have a seed, regenerate now and save
+					sKey = self.makeKeyV2(
+						sSeed,
+						oServer.getSerial(),
+						oServer.getVersion(),
+						oServer.getNumcam(),
+						oServer.getPosLock(),
+						oServer.getLprLock(),
+						oServer.getFeatures(),
+						oServer.getPosTypes()
+					)
+					dbgMsg( 'generated new key [%s]' % sKey )
+					oServer.setKey( sKey )
+					self._dbServerList.setServer( oServer )
+					return ( True, oServer.getKey() )
 
 			# Did not find seed assigned, see if our Serial Hint is available
 			oServer = self._dbServerList.getServer( bSerial=bSerial )
@@ -339,27 +375,31 @@ class Key:
 					# Serial is unlocked, so assign seed and create new key with hints
 					try:
 						( sFeatures, sPosTypes ) = self._getNewFeatures( sFeatures )
-						if oServer.getFeatures() != '':
-							sFeatures = oServer.getFeatures()
-						if oServer.getPosTypes() != '':
-							sPosTypes = oServer.getPosTypes()
+						if oServer.getFeatures() == '':
+							oServer.setFeatures( sFeatures )
+						if oServer.getPosTypes() == '':
+							oServer.setPosTypes( sPosTypes )
 						if oServer.getNumcam() == 0:
 							oServer.setNumcam( bNumcam )
+						if oServer.getPosLock() == 0:
+							oServer.setPosLock( bPosLock )
+						if oServer.getLprLock() == 0:
+							oServer.setLprLock( bLprLock )
+						if oServer.getVersion() == '':
+							oServer.setVersion( self._getMajorMinorVersion( sVersion ) )
 						sKey = self.makeKeyV2(
 							sSeed,
 							bSerial,
 							oServer.getVersion(),
 							oServer.getNumcam(),
-							bPosLock,
+							oServer.getPosLock(),
 							oServer.getLprLock(),
-							sFeatures,
-							sPosTypes
+							oServer.getFeatures(),
+							oServer.getPosTypes()
 						)
+						dbgMsg( 'generated new key [%s]' % sKey )
 						oServer.setSeed( sSeed )
 						oServer.setKey( sKey )
-						oServer.setFeatures( sFeatures )
-						oServer.setPosTypes( sPosTypes )
-						oServer.setPosLock( bPosLock )
 						self._dbServerList.setServer( oServer )
 						return ( True, oServer.getKey() )
 
@@ -411,10 +451,40 @@ class Key:
 		if bStatus != 1:
 			raise Exception( 'make-key returned bad exit status' )
 
-		rgsOutput = sOutput.strip().split( '\n' )
-		sKey = rgsOutput[ -1 ].strip()
+		sKey = sOutput.strip()
 
 		if len( sKey ) != 39:
 			raise Exception( 'make-key did not return a valid key [%s]' % sKey )
 
 		return sKey
+
+	def getSupportedFeaturesV2( self ):
+		""" Return a JSON object of features and pos_types we support. """
+
+		try:
+			rgs = [
+				'/usr/local/bin/make-key',
+				'-J'
+			]
+
+			oCMD = subprocess.Popen(
+				rgs,
+				stdin=subprocess.PIPE,
+				stdout=subprocess.PIPE,
+				stderr=subprocess.STDOUT,
+				shell=False,
+				close_fds=True
+			)
+			sOutput = oCMD.communicate()[ 0 ]
+			bStatus = oCMD.returncode
+
+			if bStatus != 1:
+				raise Exception( 'make-key returned bad exit status' )
+
+			return sOutput.strip()
+
+		except Exception, e:
+			errMsg( 'error while getting supported features V2' )
+			errMsg( e )
+			raise Exception, "System error while querying for supported features."
+

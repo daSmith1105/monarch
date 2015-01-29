@@ -84,7 +84,12 @@ dojo.declare(
 		entMac: null,
 		entSeed: null,
 		entFeatures: null,
+		btnFeatureAdd: null,
+		btnFeatureRemove: null,
 		entPosTypes: null,
+		btnPosTypeAdd: null,
+		btnPosTypeRemove: null,
+		_dlgAddRemove: null,
 		entLprLock: null,
 		btnKillHard: null,
 		btnKillSoft: null,
@@ -133,6 +138,12 @@ dojo.declare(
 				title     : "Loading...",
 				content   : "Please wait while we retrieve data from the server.",
 				style     : "width: 200px",
+				draggable : false
+			} );
+
+			this._dlgAddRemove = new dijit.Dialog( {
+				title     : "Add / Remove",
+				content   : '<input type="hidden" value="" id="entAddRemove" /><select size="1" id="cbxAddRemove"></select><br /><br /><input type="button" value="OK" id="btnAddRemove" />',
 				draggable : false
 			} );
 
@@ -214,6 +225,12 @@ dojo.declare(
 
 			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnHelp,"show-search-help");
 
+			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnFeatureAdd,"product-key-feature-add");
+			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnFeatureRemove,"product-key-feature-remove");
+			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnPosTypeAdd,"product-key-postype-add");
+			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnPosTypeRemove,"product-key-postype-remove");
+			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(dojo.byId( 'btnAddRemove' ),"product-key-dialog-ok");
+
 			this._rgoListener.push( oListener );
 		},
 
@@ -289,6 +306,74 @@ dojo.declare(
 		finishLoading: function()
 		{
 			this._dlgLoading.hide();
+		},
+
+		/**
+		 * Show a dialog to add/remove things.  Features or PosTypes.
+		 */
+		promptAddRemove: function( sType, sAction, sExisting, rgsAll )
+		{
+			// Set type for later
+			var entAddRemove = dojo.byId( 'entAddRemove' );
+			entAddRemove.value = sType + '-' + sAction;
+
+			// Remove all options
+			var cbxAddRemove = dojo.byId( 'cbxAddRemove' );
+			while ( cbxAddRemove.childNodes.length > 0 )
+				cbxAddRemove.removeChild( cbxAddRemove.childNodes[ 0 ] )
+
+			var option = document.createElement( "option" );
+			option.value = "";
+			option.text = "Select";
+			cbxAddRemove.appendChild( option );
+			option = document.createElement( "option" );
+			option.value = "";
+			option.text = "------";
+			cbxAddRemove.appendChild( option );
+
+			// Add new Options
+			if ( sAction == 'remove' ) {
+				// Remove should just use existing list
+				var rgs = sExisting.split( ',' );
+				for ( var ix = 0; ix < rgs.length; ix++ ) {
+					option = document.createElement( "option" );
+					option.value = rgs[ ix ];
+					option.text = rgs[ ix ];
+					cbxAddRemove.appendChild( option );
+				}
+
+			} else {
+				// Add should filter out existing list first
+				var rgs = sExisting.split( ',' );
+				for ( var ix = 0; ix < rgsAll.length; ix++ ) {
+					var found = false;
+					for ( ix2 = 0; ix2 < rgs.length && ! found; ix2++ ) {
+						if ( rgs[ ix2 ] == rgsAll[ ix ] )
+							found = true;
+					}
+					if ( found ) continue;
+
+					option = document.createElement( "option" );
+					option.value = rgsAll[ ix ];
+					option.text = rgsAll[ ix ];
+					cbxAddRemove.appendChild( option );
+				}
+
+			}
+
+			this._dlgAddRemove.show();
+		},
+
+		getAddRemoveType: function()
+		{
+			var entAddRemove = dojo.byId( 'entAddRemove' );
+			return entAddRemove.value;
+		},
+
+		getAddRemoveValue: function()
+		{
+			var cbxAddRemove = dojo.byId( 'cbxAddRemove' );
+			return cbxAddRemove.value;
 		},
 
 		/**
@@ -925,9 +1010,17 @@ dojo.declare(
 		{
 			return this.entFeatures.value;
 		},
+		setFeatures: function( s )
+		{
+			this.entFeatures.value = s;
+		},
 		getPosTypes: function()
 		{
 			return this.entPosTypes.value;
+		},
+		setPosTypes: function( s )
+		{
+			this.entPosTypes.value = s;
 		},
 		getLprLock: function()
 		{

@@ -218,11 +218,19 @@
 						</tr>
 						<tr dojoAttachPoint="trFeatures">
 							<td class="lbl">Features</td>
-							<td><input type="text" value="" dojoAttachPoint="entFeatures" size="32" maxlength="255" /></td>
+							<td>
+								<input type="text" value="" dojoAttachPoint="entFeatures" size="32" maxlength="255" readonly />
+								<input type="button" value="+" dojoAttachPoint="btnFeatureAdd" />
+								<input type="button" value="-" dojoAttachPoint="btnFeatureRemove" />
+							</td>
 						</tr>
 						<tr dojoAttachPoint="trPosTypes">
 							<td class="lbl">Pos Types</td>
-							<td><input type="text" value="" dojoAttachPoint="entPosTypes" size="32" maxlength="255" /></td>
+							<td>
+								<input type="text" value="" dojoAttachPoint="entPosTypes" size="32" maxlength="255" readonly />
+								<input type="button" value="+" dojoAttachPoint="btnPosTypeAdd" />
+								<input type="button" value="-" dojoAttachPoint="btnPosTypeRemove" />
+							</td>
 						</tr>
 						<tr dojoAttachPoint="trLprLock">
 							<td class="lbl">LPR Lock</td>
