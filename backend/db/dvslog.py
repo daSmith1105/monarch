@@ -27,7 +27,7 @@ class DVSLogEntry:
         libCache = lib.cache.Cache()
         self._libUtil = libCache.get('libUtil')
         
-# Stuff we store in the Database        
+				# Stuff we store in the Database        
         self._bID = bID                   # DVSLogEntry ID Number (For ease in DB operations)
         self._sSerial = bSerial           # Serial number of the DVS
         self._bEventID = bEventID         # Event ID
@@ -79,7 +79,7 @@ class DVSLogEntryList:
         """ Return the number of DVSLogEntrys we have loaded. """
         return len(self._oDVSLogEntries)   
     
-    def getList(self):
+    def getList(self, sTimestamp=None):
         
         try:
             self._oLock.acquire()
@@ -88,8 +88,11 @@ class DVSLogEntryList:
                 # Clear in case of reload
                 self._oDVSLogEntries = []
 
-                
-                rgoResult = self._libDB.query('SELECT bID, bSerial, bEventID, sData, UNIX_TIMESTAMP(dTimeStamp) FROM DVSLog ORDER BY bID')
+                sQuery = 'SELECT bID, bSerial, bEventID, sData, UNIX_TIMESTAMP(dTimeStamp) FROM DVSLog'
+								if sTimestamp is not None:
+									sQuery += ' WHERE dTimeStamp>"%s"' % sTimestamp
+								sQuery += ' ORDER BY bID'
+                rgoResult = self._libDB.query( sQuery )
 
                 if rgoResult is not None:
                     for oRow in rgoResult:

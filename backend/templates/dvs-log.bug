@@ -1,0 +1,19 @@
+{
+	product => "Support",
+	component => "reports",
+	version => "@@SERIAL@@",
+	priority => "P2",
+	op_sys => "All",
+	platform => "All",
+	severity => "normal",
+	summary => "DVS Log - @@SERIAL@@ - @@COMPANY@@ - @@NAME@@ - @@SUMMARY@@",
+	assigned_to => "@@ASSIGNEE@@",
+	comment => "
+Company: @@COMPANY@@
+Name:    @@NAME@@
+
+DVS Log Event
+@@SUMMARY@@
+@@DESCRIPTION@@
+"
+};

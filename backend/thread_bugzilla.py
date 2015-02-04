@@ -32,6 +32,7 @@ class ThreadBugzilla( threading.Thread ):
 		self._dbServerList = None
 		self._dbCameraList = None
 		self._dbMisc = None
+		self._dbDVSLogEntryList = None
 
 		# Offline debug mode
 		# This is useful if running monarch codebase on test server (not webhost)
@@ -65,6 +66,7 @@ class ThreadBugzilla( threading.Thread ):
 		self._dbServerList = libCache.get( 'dbServerList' )
 		self._dbCameraList = libCache.get( 'dbCameraList' )
 		self._dbMisc = libCache.get( 'dbMisc' )
+		self._dbDVSLogEntryList = libCache.get( 'dbDVSLogEntryList' )
 
 	def run( self ):
 		try:
@@ -124,6 +126,10 @@ class ThreadBugzilla( threading.Thread ):
 				# Send an email to double check that all customers that are paying
 				# for maintenance are marked correctly in Monarch and visa versa
 				self._sendMaintBillingReminderEmail()
+
+				# DVS Log Events
+				# Open Tickets for certain DVS Log events
+				self._processDVSLog()
 
 			self._fRunning = False
 
@@ -264,7 +270,7 @@ class ThreadBugzilla( threading.Thread ):
 			errMsg( e )
 			return False
 
-	def _openBug( self, sType, bSerial, sCompany, sName, bCamera=None ):
+	def _openBug( self, sType, bSerial, sCompany, sName, bCamera=None, sSummary=None, sDescription=None ):
 		""" Open new bug in bugzilla.  """
 
 		try:
@@ -309,6 +315,11 @@ class ThreadBugzilla( threading.Thread ):
 				sFileOut = '/tmp/onsite-maintenance.bug'
 				sAssignee = 'bugzilla@dividia.net'
 
+			elif sType == "DVS Log":
+				sFileIn = BASE + 'templates/dvs-log.bug'
+				sFileOut = '/tmp/dvs-log.bug'
+				sAssignee = 'bugzilla@dividia.net'
+
 			else:
 				raise Exception, 'unknown bug type [%s]' % sType
 
@@ -324,6 +335,10 @@ class ThreadBugzilla( threading.Thread ):
 			os.system( "perl -pi -e \"s/\@\@ASSIGNEE\@\@/%s/g\" %s" % ( re.escape( sAssignee ), sFileOut ) )
 			if bCamera is not None:
 				os.system( "perl -pi -e \"s/\@\@CAMERA\@\@/%03d/g\" %s" % ( bCamera, sFileOut ) )
+			if sSummary is not None:
+				os.system( "perl -pi -e \"s/\@\@SUMMARY\@\@/%s/g\" %s" % ( sSummary, sFileOut ) )
+			if sDescription is not None:
+				os.system( "perl -pi -e \"s/\@\@DESCRIPTION\@\@/%s/g\" %s" % ( sDescription, sFileOut ) )
 
 			os.system( "perl -pi -e \"s/@/\\\\\\@/g\" %s" % sFileOut )
 
@@ -507,11 +522,102 @@ class ThreadBugzilla( threading.Thread ):
 					oServer.getSerial(),
 					oServer.getCompany(),
 					oServer.getName(),
-					oCamera.getCamera()
+					bCamera=oCamera.getCamera()
 				):
 					bCount += 1
 
 			dbgMsg( 'opened [%d] camera failure tickets' % bCount )
+
+		except Exception, e:
+			errMsg( 'error occurred while processing camera failure tickets' )
+			errMsg( e )
+
+	def _processDVSLog( self ):
+		"""
+		Open certain tickets automatically for DVS Log Events.
+		"""
+
+		try:
+			dbgMsg( 'processing dvs log tickets' )
+
+			oMatchTest = re.compile( '.*test.*' )           # Regex to skip any "test" systems
+
+			# Process all events since our last run
+			bCount = 0
+			sLastRun = self._dbMisc.get( 'bugzilla', 'dvs-log-last' )
+			for oLog in self._dbDVSLogEntryList.getList( sLastRun ):
+
+				# Kernel Oops
+				if oLog.getEventID() == 20000:
+					sTitle = 'Kernel Oops'
+
+				# System Load
+				elif oLog.getEventID() == 21000:
+					# See if our load is too high
+					try:
+						rgb = oLog.getData()[ 6: ].split( ',' )
+						if float( rgb[ 2 ] ) > 2.0:
+							sTitle = 'System Load'
+						else:
+							continue # Skip
+					except:
+						continue
+
+				# Capture Card Error
+				elif oLog.getEventID() == 41000:
+					sTitle = 'Capture Card Error'
+
+				# Disk Report
+				elif oLog.getEventID() >= 51000 and oLog.getEventID() <= 51100:
+					sTitle = 'Disk Report'
+
+				# Camera Record Issue
+				elif oLog.getEventID() == 61000:
+					sTitle = 'Camera Record Issue'
+
+				# DB Issue
+				elif oLog.getEventID() == 65000:
+					sTitle = 'DB Issue'
+
+				# Skip
+				else:
+					continue
+
+				# Make sure we do not already have a ticket open
+				sQuery = "SELECT version FROM bugs WHERE " + \
+					"version='" + oLog.getSerial() + "' AND " + \
+					"short_desc LIKE 'DVS Log - % - " + sTitle + "' AND " + \
+					"((bug_status<>'RESOLVED') OR (bug_status='RESOLVED' AND (resolution='REMIND' OR resolution='LATER' OR resolution='WONTFIX')))"
+				oResult = self._libDB.query( sQuery )
+				if oResult is not None and len( oResult ) > 0:
+					# Already open
+					continue
+
+				# See if we should skip anything for this serial
+				oServer = self._dbServerList.getServer( bSerial=oLog.getSerial() )
+				if oServer is None:
+					continue # server does not exist?
+				if oServer.checkHasSkip():
+					continue
+				if oMatchTest.match( oServer.getCategories() ):
+					continue
+				if oServer.getMaintenance() == 'no':
+					continue
+
+				if self._openBug(
+					"DVS Log",
+					oServer.getSerial(),
+					oServer.getCompany(),
+					oServer.getName(),
+					sSummary=sTitle,
+					sDescrption=oLog.getData()
+				):
+					bCount += 1
+
+			# Save our last run time
+			self._dbMisc.set( 'bugzilla', 'dvs-log-last', time.strftime( '%Y-%m-%d %H:%M:%S' ) )
+
+			dbgMsg( 'opened [%d] dvslog tickets' % bCount )
 
 		except Exception, e:
 			errMsg( 'error occurred while processing camera failure tickets' )
