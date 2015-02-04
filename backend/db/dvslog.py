@@ -67,7 +67,7 @@ class DVSLogEntry:
         
 
 # List of DVSLogEntry Objects and subsequent operations
-class DVSLogEntryList:
+class DVSLogList:
     
     def __init__(self):
         self._oLock = threading.RLock()

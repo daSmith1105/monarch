@@ -250,7 +250,7 @@ class XmlRpcServer(SocketServer.ThreadingMixIn, SimpleXMLRPCServer.SimpleXMLRPCS
 		libCache.set('dbServerList', db.server.ServerList())
 		libCache.set('dbCameraList', db.camera.CameraList())
 		libCache.set('dbPriceList', db.pricelist.PriceList())
-		libCache.set('dbDVSLogList',db.dvslog.DVSLogEntryList())
+		libCache.set('dbDVSLogList',db.dvslog.DVSLogList())
 		libCache.set('dbMisc', db.misc.Misc())
 		libCache.set('libUtil', lib.util.Util())
 		libCache.set('dbUserList', db.user.UserList())
@@ -285,7 +285,6 @@ class XmlRpcServer(SocketServer.ThreadingMixIn, SimpleXMLRPCServer.SimpleXMLRPCS
 		stdMsg( 'reloading configuration' )
 		libCache = lib.cache.Cache()
 		libCache.get('dbPriceList')._load()
-		libCache.get('dbDVSLogList')._load()
 
 		# Reload crash report skip list
 		libCache.get( 'modCrash' )._getSkipList()

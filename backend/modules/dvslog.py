@@ -62,7 +62,7 @@ class DVSLog:
             # oDVSLogEntry.setData(sData)
             # oDVSLogEntry.setTimestamp( time.time() )
             # 
-            # self._dbDVSLogEntryList.setDVSLogEntry( oDVSLogEntry )
+            # self._dbDVSLogList.setDVSLogEntry( oDVSLogEntry )
             #===================================================================
             
 

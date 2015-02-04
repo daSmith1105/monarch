@@ -17,6 +17,7 @@ DVS_OFFLINE_LIMIT = 86400          # 24 hours (secs) ( 24 * 60 * 60 )
 CAMERA_FAIL_LIMIT = 86400          # 24 hours (secs) ( 24 * 60 * 60 )
 MAINT_REMINDER_LIMIT = 15552000    # 6 months (secs) ( 6 * 30 * 24 * 60 * 60 )
 
+PURGE_DVS_LOG = 30                 # Days
 
 class ThreadBugzilla( threading.Thread ):
 
@@ -32,7 +33,7 @@ class ThreadBugzilla( threading.Thread ):
 		self._dbServerList = None
 		self._dbCameraList = None
 		self._dbMisc = None
-		self._dbDVSLogEntryList = None
+		self._dbDVSLogList = None
 
 		# Offline debug mode
 		# This is useful if running monarch codebase on test server (not webhost)
@@ -66,7 +67,7 @@ class ThreadBugzilla( threading.Thread ):
 		self._dbServerList = libCache.get( 'dbServerList' )
 		self._dbCameraList = libCache.get( 'dbCameraList' )
 		self._dbMisc = libCache.get( 'dbMisc' )
-		self._dbDVSLogEntryList = libCache.get( 'dbDVSLogEntryList' )
+		self._dbDVSLogList = libCache.get( 'dbDVSLogList' )
 
 	def run( self ):
 		try:
@@ -545,7 +546,7 @@ class ThreadBugzilla( threading.Thread ):
 			# Process all events since our last run
 			bCount = 0
 			sLastRun = self._dbMisc.get( 'bugzilla', 'dvs-log-last' )
-			for oLog in self._dbDVSLogEntryList.getList( sLastRun ):
+			for oLog in self._dbDVSLogList.getList( sLastRun ):
 
 				# Kernel Oops
 				if oLog.getEventID() == 20000:
@@ -618,6 +619,9 @@ class ThreadBugzilla( threading.Thread ):
 			self._dbMisc.set( 'bugzilla', 'dvs-log-last', time.strftime( '%Y-%m-%d %H:%M:%S' ) )
 
 			dbgMsg( 'opened [%d] dvslog tickets' % bCount )
+
+			# Purge old log entries
+			self._libDB.query( 'DELETE FROM DVSLog WHERE dTimeStamp < DATE_SUB( NOW(), INTERVAL ' + PURGE_DVS_LOG + ' DAY )' )
 
 		except Exception, e:
 			errMsg( 'error occurred while processing camera failure tickets' )
