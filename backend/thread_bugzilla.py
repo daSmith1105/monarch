@@ -623,7 +623,7 @@ class ThreadBugzilla( threading.Thread ):
 			dbgMsg( 'opened [%d] dvslog tickets' % bCount )
 
 			# Purge old log entries
-			self._libDBbug.query( 'DELETE FROM DVSLog WHERE dTimeStamp < DATE_SUB( NOW(), INTERVAL ' + PURGE_DVS_LOG + ' DAY )' )
+			self._libDBbug.query( 'DELETE FROM DVSLog WHERE dTimeStamp < DATE_SUB( NOW(), INTERVAL ' + str( PURGE_DVS_LOG ) + ' DAY )' )
 
 		except Exception, e:
 			errMsg( 'error occurred while processing dvs log tickets' )
