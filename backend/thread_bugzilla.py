@@ -30,6 +30,7 @@ class ThreadBugzilla( threading.Thread ):
 		self._oLock = threading.RLock()
 
 		self._libDBbug = None
+		self._libDB = None
 		self._dbServerList = None
 		self._dbCameraList = None
 		self._dbMisc = None
@@ -64,6 +65,7 @@ class ThreadBugzilla( threading.Thread ):
 		# Grab other modules we might use from cache
 		libCache = lib.cache.Cache()
 		self._libDBbug = libCache.get( 'libDBbug' )
+		self._libDB = libCache.get( 'libDB' )
 		self._dbServerList = libCache.get( 'dbServerList' )
 		self._dbCameraList = libCache.get( 'dbCameraList' )
 		self._dbMisc = libCache.get( 'dbMisc' )
@@ -623,7 +625,7 @@ class ThreadBugzilla( threading.Thread ):
 			dbgMsg( 'opened [%d] dvslog tickets' % bCount )
 
 			# Purge old log entries
-			self._libDBbug.query( 'DELETE FROM DVSLog WHERE dTimeStamp < DATE_SUB( NOW(), INTERVAL ' + str( PURGE_DVS_LOG ) + ' DAY )' )
+			self._libDB.query( 'DELETE FROM DVSLog WHERE dTimeStamp < DATE_SUB( NOW(), INTERVAL ' + str( PURGE_DVS_LOG ) + ' DAY )' )
 
 		except Exception, e:
 			errMsg( 'error occurred while processing dvs log tickets' )
