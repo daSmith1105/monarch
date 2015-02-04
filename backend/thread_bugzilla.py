@@ -430,6 +430,7 @@ class ThreadBugzilla( threading.Thread ):
 
 			# Get Serials from Bugzilla that already have tickets open
 			sQuery = "SELECT version FROM bugs WHERE " + \
+				"product_id=7 AND " + \
 				"short_desc LIKE 'Offline - %' AND " + \
 				"((bug_status<>'RESOLVED') OR (bug_status='RESOLVED' AND (resolution='REMIND' OR resolution='LATER')))"
 			rgbSerial = self._getBugzillaSerials( sQuery )
@@ -487,6 +488,7 @@ class ThreadBugzilla( threading.Thread ):
 
 			# Get Serials from Bugzilla that already have tickets open
 			sQuery = "SELECT version, short_desc FROM bugs WHERE " + \
+				"product_id=7 AND " + \
 				"short_desc LIKE 'Camera Down - %' AND " + \
 				"((bug_status<>'RESOLVED') OR (bug_status='RESOLVED' AND (resolution='REMIND' OR resolution='LATER' OR resolution='WONTFIX')))"
 			rgoSerial = self._getBugzillaSerialsAndCameras( sQuery )
@@ -589,7 +591,7 @@ class ThreadBugzilla( threading.Thread ):
 					"version='" + oLog.getSerial() + "' AND " + \
 					"short_desc LIKE 'DVS Log - % - " + sTitle + "' AND " + \
 					"((bug_status<>'RESOLVED') OR (bug_status='RESOLVED' AND (resolution='REMIND' OR resolution='LATER' OR resolution='WONTFIX')))"
-				oResult = self._libDB.query( sQuery )
+				oResult = self._libDBbug.query( sQuery )
 				if oResult is not None and len( oResult ) > 0:
 					# Already open
 					continue
@@ -621,10 +623,10 @@ class ThreadBugzilla( threading.Thread ):
 			dbgMsg( 'opened [%d] dvslog tickets' % bCount )
 
 			# Purge old log entries
-			self._libDB.query( 'DELETE FROM DVSLog WHERE dTimeStamp < DATE_SUB( NOW(), INTERVAL ' + PURGE_DVS_LOG + ' DAY )' )
+			self._libDBbug.query( 'DELETE FROM DVSLog WHERE dTimeStamp < DATE_SUB( NOW(), INTERVAL ' + PURGE_DVS_LOG + ' DAY )' )
 
 		except Exception, e:
-			errMsg( 'error occurred while processing camera failure tickets' )
+			errMsg( 'error occurred while processing dvs log tickets' )
 			errMsg( e )
 
 	def _processInstallMaintenance( self ):
@@ -641,6 +643,7 @@ class ThreadBugzilla( threading.Thread ):
 
 			# Get Serials from Bugzilla that already have tickets open
 			sQuery = "SELECT version FROM bugs WHERE " + \
+				"product_id=7 AND " + \
 				"short_desc LIKE 'Maintenance - %' AND " + \
 				"((bug_status<>'RESOLVED') OR (bug_status='RESOLVED' AND (resolution='REMIND' OR resolution='LATER' OR resolution='WONTFIX')))"
 			rgbSerial = self._getBugzillaSerials( sQuery )
@@ -699,11 +702,13 @@ class ThreadBugzilla( threading.Thread ):
 
 			# Get Serials from Bugzilla that already have tickets open
 			sQuery = "SELECT version FROM bugs WHERE " + \
+				"product_id=7 AND " + \
 				"short_desc LIKE 'Weekly Check - %' AND " + \
 				"((bug_status<>'RESOLVED') OR (bug_status='RESOLVED' AND (resolution='REMIND' OR resolution='LATER' OR resolution='WONTFIX')))"
 			rgbSerialOpen = self._getBugzillaSerials( sQuery )
 			# Get Serials from Bugzilla that have tickets opened/closed for today
 			sQuery = "SELECT version FROM bugs WHERE " + \
+				"product_id=7 AND " + \
 				"short_desc LIKE 'Weekly Check - %' AND " + \
 				"DATE(delta_ts)='" + time.strftime( '%Y-%m-%d' ) + "'"
 			rgbSerialToday = self._getBugzillaSerials( sQuery )
@@ -750,6 +755,7 @@ class ThreadBugzilla( threading.Thread ):
 
 			# Get Serials from Bugzilla that already have tickets open
 			sQuery = "SELECT version FROM bugs WHERE " + \
+				"product_id=7 AND " + \
 				"short_desc LIKE 'On-Site Maintenance - %' AND " + \
 				"((bug_status<>'RESOLVED') OR (bug_status='RESOLVED' AND (resolution='REMIND' OR resolution='LATER' OR resolution='WONTFIX')))"
 			rgbSerial = self._getBugzillaSerials( sQuery )
