@@ -19,210 +19,207 @@ import lib.cache
 
 # Log Event Object
 class DVSLogEntry:
-    """ 
-    DVSLogEntry represents a DVS "dial-out" event
-    """
-    
-    def __init__(self, bID=None, bSerial=None, bEventID=None, sData=None, sTimeStamp=None ):
-        libCache = lib.cache.Cache()
-        self._libUtil = libCache.get('libUtil')
-        
-				# Stuff we store in the Database        
-        self._bID = bID                   # DVSLogEntry ID Number (For ease in DB operations)
-        self._sSerial = bSerial           # Serial number of the DVS
-        self._bEventID = bEventID         # Event ID
-        self._sData = sData               # Data in Event Message
-        self._sTimeStamp = None           # When did we last see this error  
-    
-    def getID(self):
-        return self._bID
+	""" 
+	DVSLogEntry represents a DVS "dial-out" event
+	"""
 
-    def setID(self, bID):
-        self._bID = bID
+	def __init__(self, bID=None, bSerial=None, bEventID=None, sData=None, sTimeStamp=None ):
+		libCache = lib.cache.Cache()
+		self._libUtil = libCache.get('libUtil')
 
-    def getSerial(self):
-        return self._bSerial
+		# Stuff we store in the Database        
+		self._bID = bID                   # DVSLogEntry ID Number (For ease in DB operations)
+		self._sSerial = bSerial           # Serial number of the DVS
+		self._bEventID = bEventID         # Event ID
+		self._sData = sData               # Data in Event Message
+		self._sTimeStamp = None           # When did we last see this error  
 
-    def setSerial(self, bID):
-        self._bID = bSerial
-    
-    def getEventID(self):
-        return self._bEventID
+	def getID(self):
+		return self._bID
 
-    def setEventID(self, bEventID):
-        self._bEventID = bEventID
-        
-    def getData(self):
-         return self._sData
-    
-    def setData(self, sData):
-        self._sData = sData
-        
-    def getTimeStamp(self):
-        return self._sTimeStamp
-    
-    def setTimeStamp(self, sTimeStamp):
-        self._sTimeStamp = sTimeStamp
-        
-        
+	def setID(self, bID):
+		self._bID = bID
+
+	def getSerial(self):
+		return self._bSerial
+
+	def setSerial(self, bID):
+		self._bID = bSerial
+
+	def getEventID(self):
+		return self._bEventID
+
+	def setEventID(self, bEventID):
+		self._bEventID = bEventID
+
+	def getData(self):
+		return self._sData
+
+	def setData(self, sData):
+		self._sData = sData
+
+	def getTimeStamp(self):
+		return self._sTimeStamp
+
+	def setTimeStamp(self, sTimeStamp):
+		self._sTimeStamp = sTimeStamp
+
+
 
 # List of DVSLogEntry Objects and subsequent operations
 class DVSLogList:
-    
-    def __init__(self):
-        self._oLock = threading.RLock()
-        libCache = lib.cache.Cache()
-        self._libDB = libCache.get('libDB')
-        self._libUtil = libCache.get('libUtil')
- 
-    def size(self):
-        """ Return the number of DVSLogEntrys we have loaded. """
-        return len(self._oDVSLogEntries)   
-    
-    def getList(self, sTimestamp=None):
-        
-        try:
-            self._oLock.acquire()
 
-            try:
-                # Clear in case of reload
-                self._oDVSLogEntries = []
+	def __init__(self):
+		self._oLock = threading.RLock()
+		libCache = lib.cache.Cache()
+		self._libDB = libCache.get('libDB')
+		self._libUtil = libCache.get('libUtil')
 
-                sQuery = 'SELECT bID, bSerial, bEventID, sData, UNIX_TIMESTAMP(dTimeStamp) FROM DVSLog'
-								if sTimestamp is not None:
-									sQuery += ' WHERE dTimeStamp>"%s"' % sTimestamp
-								sQuery += ' ORDER BY bID'
-                rgoResult = self._libDB.query( sQuery )
+	def size(self):
+		""" Return the number of DVSLogEntrys we have loaded. """
+		return len(self._oDVSLogEntries)   
 
-                if rgoResult is not None:
-                    for oRow in rgoResult:
-                        self._oDVSLogEntries.append(
-                            DVSLogEntry(
-                                oRow[0],
-                                oRow[1],
-                                oRow[2],
-                                oRow[3],
-                                oRow[4]
-                            )
-                        )
-                   
-                """ Return list copy of our DVSLogEntry List. """
-                return copy.copy(self._oDVSLogEntries)
+	def getList(self, sTimestamp=None):
 
-            except Exception, e:
-                raise Exception, 'error loading DVSLogEntry list from database [%s]' % e
+		try:
+			self._oLock.acquire()
 
-        finally:
-            self._oLock.release()
+			try:
+				# Clear in case of reload
+				self._oDVSLogEntries = []
 
-    def addDVSLogEntry(self, bSerial, bEventID, sData, sTimeStamp):
-        """ Add new DVSLogEntry to the DVSLogEntry List. """
-       
+				sQuery = 'SELECT bID, bSerial, bEventID, sData, UNIX_TIMESTAMP(dTimeStamp) FROM DVSLog'
+				if sTimestamp is not None:
+					sQuery += ' WHERE dTimeStamp>"%s"' % sTimestamp
+				sQuery += ' ORDER BY bID'
+				rgoResult = self._libDB.query( sQuery )
 
-        try:
-            self._oLock.acquire()
+				if rgoResult is not None:
+					for oRow in rgoResult:
+						self._oDVSLogEntries.append(
+							DVSLogEntry(
+								oRow[0],
+								oRow[1],
+								oRow[2],
+								oRow[3],
+								oRow[4]
+							)
+						)
 
-            try:
-                self._libDB.query('INSERT INTO DVSLog (bSerial, bEventID, sData, dTimeStamp) VALUES (%s,%s,%s,FROM_UNIXTIME(%s))',
-                    bSerial,
-                    bEventID,
-                    sData,
-                    sTimeStamp
-                )
-                
-                rgoResult = self._libDB.query('SELECT bID FROM DVSLog ORDER BY bID LIMIT 1')
+				""" Return list copy of our DVSLogEntry List. """
+				return copy.copy(self._oDVSLogEntries)
 
-                bID = rgoResult[0][0]
+			except Exception, e:
+				raise Exception, 'error loading DVSLogEntry list from database [%s]' % e
 
-                oDVSLogEntry = self.getDVSLogEntry( bID )
-                dbgMsg('added DVSLogEntry id-[%s]' % bID)
-                
-                return oDVSLogEntry
+		finally:
+			self._oLock.release()
 
-            except Exception, e:
-                raise Exception, 'error adding DVSLogEntry [%s]' % e
+	def addDVSLogEntry(self, bSerial, bEventID, sData, sTimeStamp):
+		""" Add new DVSLogEntry to the DVSLogEntry List. """
 
-        finally:
-            self._oLock.release()
+		try:
+			self._oLock.acquire()
 
-    def delDVSLogEntry(self, oDVSLogEntry):
-        """ Delete this DVSLogEntry. """
+			try:
+				self._libDB.query('INSERT INTO DVSLog (bSerial, bEventID, sData, dTimeStamp) VALUES (%s,%s,%s,FROM_UNIXTIME(%s))',
+					bSerial,
+					bEventID,
+					sData,
+					sTimeStamp
+				)
 
-        try:
-            self._oLock.acquire()
+				rgoResult = self._libDB.query('SELECT bID FROM DVSLog ORDER BY bID LIMIT 1')
 
-            try:
-                
-                oDVSLogEntry = self.getDVSLogEntry( bID = oDVSLogEntry.getID )
-                
-                if oDVSLogEntry is None:
-                    dbgMsg( 'delete DVSLogEntry ID-[%d] failed' % oDVSLogEntry.getID() )
-                    return False
-                
-                self._libDB.query('DELETE FROM DVSLog WHERE bID=%s', oDVSLogEntry.getID())
+				bID = rgoResult[0][0]
 
-                dbgMsg('delete DVSLogEntry id-[%s]' % oDVSLogEntry.getID())
-                return False
+				oDVSLogEntry = self.getDVSLogEntry( bID )
+				dbgMsg('added DVSLogEntry id-[%s]' % bID)
 
-            except Exception, e:
-                raise Exception, 'error deleting DVSLogEntry [%s]' % e
+				return oDVSLogEntry
 
-        finally:
-            self._oLock.release()
+			except Exception, e:
+				raise Exception, 'error adding DVSLogEntry [%s]' % e
 
-    def getDVSLogEntry(self, bID=None):
-        """ Find a DVSLogEntry by ID """
+		finally:
+			self._oLock.release()
 
-        try:
-            self._oLock.acquire()
+	def delDVSLogEntry(self, oDVSLogEntry):
+		""" Delete this DVSLogEntry. """
 
-            try:
-                rgoResult = ()
-            
-                sQuery = 'SELECT bID, bSerial, bEventID, sData, UNIX_TIMESTAMP(dTimeStamp) FROM DVSLog WHERE '
-                
-                if bID is not None:
-                    sQuery += 'bID=%s'
-                    rgoResult = self._libDB.query( sQuery, bID )
-                                
-                if len ( rgoResult ) == 0:
-                    # No Results
-                    return None
-                
-                
-                oRow = rgoResult[ 0 ]
-                oDVSLogEntry = DVSLogEntry(oRow[0],oRow[1],oRow[2],oRow[3],oRow[4])
+		try:
+			self._oLock.acquire()
 
-                return copy.copy( oDVSLogEntry )
+			try:
 
-            except Exception, e:
-                raise Exception, 'error getting DVSLogEntry [%s]' % e
+				oDVSLogEntry = self.getDVSLogEntry( bID = oDVSLogEntry.getID )
 
-        finally:
-            self._oLock.release()
-            
-    
-    def setDVSLogEntry(self, oDVSLogEntry):
-        """ Update the DVSLogEntry Object """
-    
-        try:
-            self._oLock.acquire()
+				if oDVSLogEntry is None:
+					dbgMsg( 'delete DVSLogEntry ID-[%d] failed' % oDVSLogEntry.getID() )
+					return False
 
-            try:
-                oDVSLogEntry = self.getDVSLogEntry( bID=oDVSLogEntry.getID() )
-                if oDVSLogEntry is not None:
-                    self._libDB.query('UPDATE DVSLog SET bSerial=%s, bEventID=%s, sData=%s, sTimeStamp=FROM_UNIXTIME(%s) WHERE bID=%s',
-                            oDVSLogEntry.getSerial(),
-                            oDVSLogEntry.getEventID(),
-                            oDVSLogEntry.getData(),
-                            oDVSLogEntry.getTimeStamp()
-                        )
-        
-                    dbgMsg('updated DVSLogEntry-[%d]' % oDVSLogEntry.getID())
-                    return
-        
-            except Exception, e:
-                raise Exception, 'error updating DVSLogEntry [%s]' % e
+				self._libDB.query('DELETE FROM DVSLog WHERE bID=%s', oDVSLogEntry.getID())
 
-        finally:
-            self._oLock.release()
+				dbgMsg('delete DVSLogEntry id-[%s]' % oDVSLogEntry.getID())
+				return False
+
+			except Exception, e:
+				raise Exception, 'error deleting DVSLogEntry [%s]' % e
+
+		finally:
+			self._oLock.release()
+
+	def getDVSLogEntry(self, bID=None):
+		""" Find a DVSLogEntry by ID """
+
+		try:
+			self._oLock.acquire()
+
+			try:
+				rgoResult = ()
+
+				sQuery = 'SELECT bID, bSerial, bEventID, sData, UNIX_TIMESTAMP(dTimeStamp) FROM DVSLog WHERE '
+
+				if bID is not None:
+					sQuery += 'bID=%s'
+				rgoResult = self._libDB.query( sQuery, bID )
+
+				if len ( rgoResult ) == 0:
+					# No Results
+					return None
+
+				oRow = rgoResult[ 0 ]
+				oDVSLogEntry = DVSLogEntry(oRow[0],oRow[1],oRow[2],oRow[3],oRow[4])
+
+				return copy.copy( oDVSLogEntry )
+
+			except Exception, e:
+				raise Exception, 'error getting DVSLogEntry [%s]' % e
+
+		finally:
+			self._oLock.release()
+
+	def setDVSLogEntry(self, oDVSLogEntry):
+		""" Update the DVSLogEntry Object """
+
+		try:
+			self._oLock.acquire()
+
+			try:
+				oDVSLogEntry = self.getDVSLogEntry( bID=oDVSLogEntry.getID() )
+				if oDVSLogEntry is not None:
+					self._libDB.query('UPDATE DVSLog SET bSerial=%s, bEventID=%s, sData=%s, sTimeStamp=FROM_UNIXTIME(%s) WHERE bID=%s',
+						oDVSLogEntry.getSerial(),
+						oDVSLogEntry.getEventID(),
+						oDVSLogEntry.getData(),
+						oDVSLogEntry.getTimeStamp()
+					)
+
+					dbgMsg('updated DVSLogEntry-[%d]' % oDVSLogEntry.getID())
+					return
+
+			except Exception, e:
+				raise Exception, 'error updating DVSLogEntry [%s]' % e
+
+		finally:
+			self._oLock.release()
