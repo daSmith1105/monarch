@@ -34,7 +34,7 @@ class DVSLog:
 				raise Exception( 'bad serial' )
 			try:
 				if bEventID is not None:
-				bEventID = int( bEventID )
+					bEventID = int( bEventID )
 			except ValueError:
 				raise Exception( 'bad event id' )
 
