@@ -580,6 +580,10 @@ class ThreadBugzilla( threading.Thread ):
 				elif oLog.getEventID() == 61000:
 					sTitle = 'Camera Record Issue'
 
+				# VMD
+				elif oLog.getEventID() == 62000:
+					sTitle = 'VMD Issue'
+
 				# DB Issue
 				elif oLog.getEventID() == 65000:
 					sTitle = 'DB Issue'

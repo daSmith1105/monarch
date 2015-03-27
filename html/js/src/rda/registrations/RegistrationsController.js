@@ -206,7 +206,7 @@ dojo.declare(
 
 			// Setup Page Links
 			if ( ! this.oView.isListPageSetup() ) {
-				var bNum = Math.ceil( oObj.getList().length / this.bSpan );
+				var bNum = Math.ceil( oObj.getList().length / this.bSpan ) + 1;
 				this.oView.setListPage( bNum, this.bSpan );
 			}
 
