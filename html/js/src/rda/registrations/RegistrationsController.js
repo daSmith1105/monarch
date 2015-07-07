@@ -67,7 +67,7 @@ dojo.declare(
 		activate: function()
 		{
 			// Enable/disable Kill feature based on user
-			if ( this.oAuthModel.checkIsLoaded() && this.oAuthModel.getName() == "rayers" )
+			if ( this.oAuthModel.checkIsLoaded() && ( this.oAuthModel.getName() == "rayers" || this.oAuthModel.getName() == "mlaplante" ) )
 				this.oView.toggleKill( true );
 			else
 				this.oView.toggleKill( false );
