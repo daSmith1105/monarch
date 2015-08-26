@@ -588,6 +588,10 @@ class ThreadBugzilla( threading.Thread ):
 				elif oLog.getEventID() == 65000:
 					sTitle = 'DB Issue'
 
+				# System Config
+				elif oLog.getEventID() >= 50000 and oLog.getEventID() <= 50999:
+					sTitle = 'System Config'
+
 				# Skip
 				else:
 					continue
