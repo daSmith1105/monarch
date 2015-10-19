@@ -141,7 +141,7 @@ class Stats:
 			# Block all access to adding new servers unless they are within our network
 			#rgsIP = sIP.split( '.' )
 			#if not ( rgsIP[ 0 ] == '192' and rgsIP[ 1 ] == '168' and rgsIP[ 2 ] == '0' ):
-			rgsDividia = [ '24.178.194.110', '75.93.27.4' ]
+			rgsDividia = [ '24.178.194.110', '75.93.27.4', '47.51.193.54' ]
 			if sIP not in rgsDividia:
 				dbgMsg( 'blocking newserver call from outside Dividia network [%s]' % sIP )
 				return False
