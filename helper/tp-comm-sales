@@ -1,0 +1,258 @@
+#!/usr/bin/python
+
+import sys
+import pymssql
+import time
+import locale
+
+DB_HOST = 'tigerpaw'
+DB_USER = 'DTECH\\rayers'
+DB_PASS = 'Mlk136!$'
+DB_NAME = 'TigerPaw'
+
+TECH_COMM = {}
+TECH_COMM[ 'Default' ] = {}
+TECH_COMM[ 'Default' ][ 'Standard' ] = .1
+TECH_COMM[ 'Default' ][ 'Distributor' ] = .05
+TECH_COMM[ 'Default' ][ 'Tier' ] = .1
+TECH_COMM[ 'Default' ][ 'TierLimit' ] = 999999
+TECH_COMM[ 'Randy Whitley' ] = {}
+TECH_COMM[ 'Randy Whitley' ][ 'Standard' ] = .15
+TECH_COMM[ 'Randy Whitley' ][ 'Distributor' ] = .05
+TECH_COMM[ 'Randy Whitley' ][ 'Tier' ] = .1
+TECH_COMM[ 'Randy Whitley' ][ 'TierLimit' ] = 20000
+
+
+class App:
+
+	_oDB = None
+	_oCursor = None
+
+	def __init__( self ):
+		self._oDB = pymssql.connect( DB_HOST, DB_USER, DB_PASS, DB_NAME )
+		self._oCursor = self._oDB.cursor( as_dict=True )
+
+		locale.setlocale( locale.LC_ALL, 'en_US' )
+
+	def finish( self ):
+
+		self._oDB.close()
+
+
+	def prepHeader( self, fHTML, rgsBody, sName, sRunFrom, sRunTo ):
+
+		if fHTML:
+			# Prepend Report Name
+			rgsBody.append( '<html><body>' )
+			rgsBody.append( '<table>' )
+			rgsBody.append( '<tr><td>Report Name:</td><td>&nbsp;%s</td></tr>' % sName )
+
+			# Prepend our report run dates to email
+			rgsBody.append( '<tr><td>Start Date:</td><td>&nbsp;%s</td></tr>' % sRunFrom )
+			rgsBody.append( '<tr><td>End   Date:</td><td>&nbsp;%s</td></tr>' % sRunTo )
+			rgsBody.append( '</table>' )
+
+		else:
+			# Prepend Report Name
+			rgsBody.append( 'Report Name: %s' % sName )
+
+			# Prepend our report run dates to email
+			rgsBody.append( 'Start Date: %s' % sRunFrom )
+			rgsBody.append( 'End   Date: %s' % sRunTo )
+
+		return rgsBody
+
+	def prepFooter( self, fHTML, rgsBody ):
+
+		if fHTML:
+			rgsBody.append( '<p>This report was generated at %s from TigerPaw.</p></body></html>' % time.asctime() )
+
+		else:
+			rgsBody.append( '\nThis report was generated at %s from TigerPaw.' % time.asctime() )
+
+		return rgsBody
+
+	def getCompletedServiceOrdersByRep( self, sRunFrom, sRunTo ):
+
+		self._oCursor.execute( """
+			SELECT S.DateClosed, S.SONumber, A.AccountName, A.AccountType, S.BriefDescription, R.RepName, SUM( P.TotalSellingprice ) AS Total
+			FROM tblServiceOrders AS S, tblSOPartsUsed AS P, tblPriceBook AS I, tblReps AS R, tblAccounts AS A
+			WHERE
+				S.SONumber=P.SONumber AND
+				P.ItemID=I.ItemID AND
+				S.RepToCredit=R.RepNumber AND
+				S.AccountNumber=A.AccountNumber AND
+				( I.Type<>'L' AND I.ItemID<>'DOWNPAYMENT' AND I.ItemID<>'SHIPPING' ) AND
+				( S.DateClosed>=%s AND S.DateClosed<=%s ) AND
+				( S.SOType='Installation' OR S.SOType='Ship Only' ) AND
+				( S.Status='Closed' OR S.Status='Complete' OR S.Status='Complete with Email' OR S.Status='Ready for Billing' )
+			GROUP BY S.DateClosed, S.SONumber, A.AccountName, A.AccountType, S.BriefDescription, R.RepName
+			ORDER BY R.RepName, S.DateClosed, A.AccountName, S.SONumber
+		""", ( sRunFrom, sRunTo ) )
+
+	def _wrapTitle( self, fHTML, rgsBody ):
+
+		if fHTML:
+			rgsBody.append( '<h2>Commission By Rep</h2>' )
+
+		else:
+			rgsBody.append( '\nCommission By Rep\n' )
+
+		return rgsBody
+
+	def _wrapRepTitle( self, fHTML, rgsBody, sRep ):
+
+		if fHTML:
+			rgsBody.append( '<h3>%s</h3>' % sRep )
+
+		else:
+			rgsBody.append( '\n%s\n' % sRep )
+
+		return rgsBody
+
+	def _wrapRepHeader( self, fHTML, rgsBody ):
+
+		if fHTML:
+			rgsBody.append( '<table>' )
+			rgsBody.append( '<tr><th>Date</th><th>SO</th><th>Account</th><th>Description</th><th>Total</th><th>Rate</th><th>Comm</th></tr>' )
+
+		else:
+			rgsBody.append( '%-12s%-7s%-30s%-30s%-14s%-6s%s' % (
+				'Date', 'SO', 'Account', 'Description', 'Total', 'Rate', 'Comm' ) )
+
+		return rgsBody
+
+	def _wrapRepItem( self, fHTML, rgsBody, oRow, bTotal, bRate, bSubTotal ):
+
+		if fHTML:
+			rgsBody.append( '<tr><td>%s</td><td>%d</td><td>%s</td><td>%s</td><td align="right">%s</td><td align="right">%d%%</td><td align="right">%s</td></tr>' % (
+				oRow[ 'DateClosed' ].strftime( '%m/%d/%Y' ),
+				oRow[ 'SONumber' ],
+				oRow[ 'AccountName' ],
+				oRow[ 'BriefDescription' ],
+				locale.format( '%.2f', float( bTotal ), grouping=True ),
+				bRate * 100,
+				locale.format( '%.2f', float( bSubTotal ), grouping=True )
+			) )
+
+		else:
+			rgsBody.append( '%-12s%-7d%-30s%-30s%10s%6d%%%10s' % (
+				oRow[ 'DateClosed' ].strftime( '%m/%d/%Y' ),
+				oRow[ 'SONumber' ],
+				oRow[ 'AccountName' ][ 0:28 ],
+				oRow[ 'BriefDescription' ][ 0:28 ],
+				locale.format( '%.2f', float( bTotal ), grouping=True ),
+				bRate * 100,
+				locale.format( '%.2f', float( bSubTotal ), grouping=True )
+			) )
+
+		return rgsBody
+
+	def _wrapTotalLine( self, fHTML, rgsBody, bTotal ):
+
+		if fHTML:
+			rgsBody.append( '<tr><td colspan="7" align="right"><strong><em>%s</em></strong></td><td align="right"><strong>%s</strong></td></tr>' % (
+				'Total', locale.format( '%.2f', float( bTotal ), grouping=True ) ) )
+			rgsBody.append( '</table>' )
+
+		else:
+			rgsBody.append( '%7s  %s\n' % (
+				'Total', locale.format( '%.2f', float( bTotal ), grouping=True ) ) )
+
+		return rgsBody
+
+	def prepCommissionByRep( self, fHTML, rgsBody ):
+
+		oRow = self._oCursor.fetchone()
+
+		if not oRow: return rgsBody
+
+		rgsBody = self._wrapTitle( fHTML, rgsBody )
+		sRep = ''
+		bCommTotal = 0.0          # Total Commission Paid
+		bBalanceTotal = 0.0       # Sub of Total equipment
+
+		while oRow:
+
+			if sRep != oRow[ 'RepName' ]:
+				if sRep != '':
+					rgsBody = self._wrapTotalLine( fHTML, rgsBody, bCommTotal )
+
+				sRep = oRow[ 'RepName' ]
+				bCommTotal = 0.0
+				bBalanceTotal = 0.0
+
+				rgsBody = self._wrapRepTitle( fHTML, rgsBody, sRep )
+
+				rgsBody = self._wrapRepHeader( fHTML, rgsBody )
+
+			sRateType = 'Standard'
+			if oRow[ 'AccountType' ] == 'Distributor':
+				sRateType = 'Distributor'
+			bRate = TECH_COMM[ 'Default' ][ sRateType ]
+			bRateTier = TECH_COMM[ 'Default' ][ 'Tier' ]
+			bRateTierLimit = TECH_COMM[ 'Default' ][ 'TierLimit' ]
+			if sRep in TECH_COMM.keys():
+				bRate = TECH_COMM[ sRep ][ sRateType ]
+				bRateTier = TECH_COMM[ sRep ][ 'Tier' ]
+				bRateTierLimit = TECH_COMM[ sRep ][ 'TierLimit' ]
+
+			bItemTotal = float( oRow[ 'Total' ] )
+
+			# Handle Randy Split Tier here
+			if sRateType != 'Distributor':
+				if bBalanceTotal > float( bRateTierLimit ):
+					bRate = bRateTier
+
+				elif bBalanceTotal + bItemTotal > float( bRateTierLimit ):
+					# Handle lower tier split item here
+					bItemTotal = bItemTotal - ( bBalanceTotal + bItemTotal - float( bRateTierLimit ) )
+					bCommItem = bItemTotal * bRate
+					rgsBody = self._wrapRepItem( fHTML, rgsBody, oRow, bItemTotal, bRate, bCommItem )
+					bCommTotal += bCommItem
+					# Remainder
+					bItemTotal = float( oRow[ 'Total' ] )
+					bItemTotal = bBalanceTotal + bItemTotal - float( bRateTierLimit )
+					bRate = bRateTier
+
+			bCommItem = bItemTotal * bRate
+
+			rgsBody = self._wrapRepItem( fHTML, rgsBody, oRow, bItemTotal, bRate, bCommItem )
+
+			bCommTotal += bCommItem
+			bBalanceTotal += float( oRow[ 'Total' ] )
+
+			oRow = self._oCursor.fetchone()
+
+		if sRep != '':
+			rgsBody = self._wrapTotalLine( fHTML, rgsBody, bCommTotal )
+
+		return rgsBody
+
+
+def main( argv ):
+
+	sReport = 'Sales Commission'
+	sRunFrom = '2015-12-01'
+	sRunTo = '2015-12-31'
+	fHTML = False
+	rgsBody = []
+
+	oApp = App()
+
+	rgsBody = oApp.prepHeader( fHTML, rgsBody, sReport, sRunFrom, sRunTo )
+
+	# Commission
+	oApp.getCompletedServiceOrdersByRep( sRunFrom, sRunTo )
+	rgsBody = oApp.prepCommissionByRep( fHTML, rgsBody )
+
+	rgsBody = oApp.prepFooter( fHTML, rgsBody )
+
+	oApp.finish()
+
+	print( "\n".join( rgsBody ) )
+
+	return 0
+
+if __name__ == '__main__':
+	sys.exit( main( sys.argv ) )
