@@ -233,8 +233,8 @@ class App:
 def main( argv ):
 
 	sReport = 'Sales Commission'
-	sRunFrom = '2015-12-01'
-	sRunTo = '2015-12-31'
+	sRunFrom = '2016-01-01'
+	sRunTo = '2016-01-31'
 	fHTML = False
 	rgsBody = []
 

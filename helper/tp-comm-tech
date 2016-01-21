@@ -289,8 +289,8 @@ class App:
 def main( argv ):
 
 	sReport = 'Tech Commission'
-	sRunFrom = '2015-12-06'
-	sRunTo = '2015-12-19'
+	sRunFrom = '2016-01-15'
+	sRunTo = '2016-01-30'
 	fHTML = False
 	rgsBody = []
 
