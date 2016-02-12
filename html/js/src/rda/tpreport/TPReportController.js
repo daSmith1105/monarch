@@ -15,6 +15,7 @@ dojo.declare(
 	[ rda.common.DController, rda.common.Observer ],
 	{
 		// Properties
+		oAuthModel: null,
 		oTPReportModel: null,
 		oView: null,
 		fBlockUpdate: false,
@@ -29,9 +30,10 @@ dojo.declare(
      * @param oView
      *   View for this module in MVC
      */
-		constructor: function( oTPReportModel, oView )
+		constructor: function( oAuthModel, oTPReportModel, oView )
 		{
 			this.oView = oView;
+			this.oAuthModel = oAuthModel;
 			this.oTPReportModel = oTPReportModel;
 
 			this.oView.addActionListener( this );

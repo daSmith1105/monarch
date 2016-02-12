@@ -86,7 +86,7 @@ class App:
 	def prepHeaderPlain( self, rgsBody, sName, sVendor ):
 
 		# Prepend Report Name
-		rgsBody.append( 'Report Name: %s - ' % ( sName, sVendor ) )
+		rgsBody.append( 'Report Name: %s - %s' % ( sName, sVendor ) )
 
 		return rgsBody
 

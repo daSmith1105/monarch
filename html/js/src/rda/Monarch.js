@@ -120,7 +120,7 @@ dojo.declare(
 				this.oPriceListController.addActionListener( this );
 
 				this.oTPReportView = new rda.tpreport.TPReportView();
-				this.oTPReportController = new rda.tpreport.TPReportController( this.oTPReportModel, this.oTPReportView );
+				this.oTPReportController = new rda.tpreport.TPReportController( this.oAuthModel, this.oTPReportModel, this.oTPReportView );
 				this.oTPReportController.addActionListener( this );
 
 				this.showScreen( new rda.Screen( this.oLoginController, this.oLoginView ) );
