@@ -37,6 +37,7 @@ import modules.dvslog
 import modules.crash
 import modules.ticket
 import modules.customer
+import modules.tigerpaw
 
 
 SERVER_PORT = 9000
@@ -265,6 +266,7 @@ class XmlRpcServer(SocketServer.ThreadingMixIn, SimpleXMLRPCServer.SimpleXMLRPCS
 		libCache.set('modCrash',modules.crash.Crash())
 		libCache.set('modTicket', modules.ticket.Ticket())
 		libCache.set('modCustomer', modules.customer.Customer())
+		libCache.set('modTigerpaw', modules.tigerpaw.Tigerpaw())
 
 		# Hook up Process Control Handlers
 		#libCache.get('modUtil')._controlProcess += self.rgoThread['ProcessControl'].controlProcess

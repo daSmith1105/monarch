@@ -286,45 +286,50 @@ class App:
 		return rgsBody
 
 
+	def run( self, sRunFrom, sRunTo, fHTML=True ):
+
+		sReport = 'Tech Commission'
+		rgsBody = []
+
+		self = App()
+
+		if fHTML:
+			rgsBody = self.prepHeaderHTML( rgsBody, sReport, sRunFrom, sRunTo )
+
+			# Unaccepted Time Logs
+			self.getUnacceptedTimeLogs( sRunFrom, sRunTo )
+			rgsBody = self.prepUnacceptedTimeLogsHTML( rgsBody )
+
+			# Commission
+			self.getAcceptedTimeLogsByRep( sRunFrom, sRunTo )
+			rgsBody = self.prepCommissionByRepHTML( rgsBody )
+
+			rgsBody = self.prepFooterHTML( rgsBody )
+
+		else:
+			rgsBody = self.prepHeaderPlain( rgsBody, sReport, sRunFrom, sRunTo )
+
+			# Unaccepted Time Logs
+			self.getUnacceptedTimeLogs( sRunFrom, sRunTo )
+			rgsBody = self.prepUnacceptedTimeLogsPlain( rgsBody )
+
+			# Commission
+			self.getAcceptedTimeLogsByRep( sRunFrom, sRunTo )
+			rgsBody = self.prepCommissionByRepPlain( rgsBody )
+
+			rgsBody = self.prepFooterPlain( rgsBody )
+
+		self.finish()
+
+		return( "\n".join( rgsBody ) )
+
 def main( argv ):
 
-	sReport = 'Tech Commission'
 	sRunFrom = '2016-01-31'
 	sRunTo = '2016-02-13'
-	fHTML = False
-	rgsBody = []
 
 	oApp = App()
-
-	if fHTML:
-		rgsBody = oApp.prepHeaderHTML( rgsBody, sReport, sRunFrom, sRunTo )
-
-		# Unaccepted Time Logs
-		oApp.getUnacceptedTimeLogs( sRunFrom, sRunTo )
-		rgsBody = oApp.prepUnacceptedTimeLogsHTML( rgsBody )
-
-		# Commission
-		oApp.getAcceptedTimeLogsByRep( sRunFrom, sRunTo )
-		rgsBody = oApp.prepCommissionByRepHTML( rgsBody )
-
-		rgsBody = oApp.prepFooterHTML( rgsBody )
-
-	else:
-		rgsBody = oApp.prepHeaderPlain( rgsBody, sReport, sRunFrom, sRunTo )
-
-		# Unaccepted Time Logs
-		oApp.getUnacceptedTimeLogs( sRunFrom, sRunTo )
-		rgsBody = oApp.prepUnacceptedTimeLogsPlain( rgsBody )
-
-		# Commission
-		oApp.getAcceptedTimeLogsByRep( sRunFrom, sRunTo )
-		rgsBody = oApp.prepCommissionByRepPlain( rgsBody )
-
-		rgsBody = oApp.prepFooterPlain( rgsBody )
-
-	oApp.finish()
-
-	print( "\n".join( rgsBody ) )
+	print oApp.run( sRunFrom, sRunTo, False )
 
 	return 0
 

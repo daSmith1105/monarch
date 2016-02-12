@@ -25,6 +25,8 @@ dojo.require( "rda.backend.config.PLCategoryModel" );
 dojo.require( "rda.backend.config.PLCategory" );
 dojo.require( "rda.backend.config.PLItemModel" );
 dojo.require( "rda.backend.config.PLItem" );
+dojo.require( "rda.backend.config.TPReportModel" );
+dojo.require( "rda.backend.config.TPReport" );
 dojo.require( "rda.login.LoginView" );
 dojo.require( "rda.login.LoginController" );
 dojo.require( "rda.welcome.WelcomeView" );
@@ -35,6 +37,8 @@ dojo.require( "rda.camfail.CameraFailView" );
 dojo.require( "rda.camfail.CameraFailController" );
 dojo.require( "rda.pricelist.PriceListView" );
 dojo.require( "rda.pricelist.PriceListController" );
+dojo.require( "rda.tpreport.TPReportView" );
+dojo.require( "rda.tpreport.TPReportController" );
 
 dojo.declare(
 	"rda.Monarch",
@@ -50,6 +54,7 @@ dojo.declare(
 		oCameraModel: null,
 		oPLCategoryModel: null,
 		oPLItemModel: null,
+		oTPReportModel: null,
 		oLoginView: null,
 		oLoginController: null,
 		oWelcomeView: null,
@@ -60,6 +65,8 @@ dojo.declare(
 		oCameraFailController: null,
 		oPriceListView: null,
 		oPriceListController: null,
+		oTPReportView: null,
+		oTPReportController: null,
 		divContent: null,
 		bHandleResize: 0,
 
@@ -89,6 +96,7 @@ dojo.declare(
 				this.oCameraModel = new rda.backend.config.CameraModel();
 				this.oPLCategoryModel = new rda.backend.config.PLCategoryModel();
 				this.oPLItemModel = new rda.backend.config.PLItemModel();
+				this.oTPReportModel = new rda.backend.config.TPReportModel();
 				this.oAuthModel.addObserver( this );     // Used to load and reset all Models
 
 				this.oLoginView = new rda.login.LoginView();
@@ -110,6 +118,10 @@ dojo.declare(
 				this.oPriceListView = new rda.pricelist.PriceListView();
 				this.oPriceListController = new rda.pricelist.PriceListController( this.oPLCategoryModel, this.oPLItemModel, this.oPriceListView );
 				this.oPriceListController.addActionListener( this );
+
+				this.oTPReportView = new rda.tpreport.TPReportView();
+				this.oTPReportController = new rda.tpreport.TPReportController( this.oTPReportModel, this.oTPReportView );
+				this.oTPReportController.addActionListener( this );
 
 				this.showScreen( new rda.Screen( this.oLoginController, this.oLoginView ) );
 
@@ -153,6 +165,7 @@ dojo.declare(
 					this.oCameraModel.setSession( sSess );
 					this.oPLCategoryModel.setSession( sSess );
 					this.oPLItemModel.setSession( sSess );
+					this.oTPReportModel.setSession( sSess );
 
 				} else {
 					// No longer authenticated
@@ -164,6 +177,7 @@ dojo.declare(
 					this.oCameraModel.reset();
 					this.oPLCategoryModel.reset();
 					this.oPLItemModel.reset();
+					this.oTPReportModel.reset();
 
 				}
 			}
@@ -190,6 +204,9 @@ dojo.declare(
 
 			} else if ( sCommand == "screen-change-pricelist" ) {
 				this.showScreen( new rda.Screen( this.oPriceListController, this.oPriceListView ) );
+
+			} else if ( sCommand == "screen-change-tpreport" ) {
+				this.showScreen( new rda.Screen( this.oTPReportController, this.oTPReportView ) );
 
 			} else {
 				console.log( "screen change [" + sCommand + "] not implemented" );

@@ -230,27 +230,32 @@ class App:
 		return rgsBody
 
 
+	def run( self, sRunFrom, sRunTo, fHTML=True ):
+
+		sReport = 'Sales Commission'
+		rgsBody = []
+
+		self = App()
+
+		rgsBody = self.prepHeader( fHTML, rgsBody, sReport, sRunFrom, sRunTo )
+
+		# Commission
+		self.getCompletedServiceOrdersByRep( sRunFrom, sRunTo )
+		rgsBody = self.prepCommissionByRep( fHTML, rgsBody )
+
+		rgsBody = self.prepFooter( fHTML, rgsBody )
+
+		self.finish()
+
+		return( "\n".join( rgsBody ) )
+
 def main( argv ):
 
-	sReport = 'Sales Commission'
-	sRunFrom = '2016-01-01'
-	sRunTo = '2016-02-10'
-	fHTML = False
-	rgsBody = []
+	sRunFrom = '2016-02-01'
+	sRunTo = '2016-02-29'
 
 	oApp = App()
-
-	rgsBody = oApp.prepHeader( fHTML, rgsBody, sReport, sRunFrom, sRunTo )
-
-	# Commission
-	oApp.getCompletedServiceOrdersByRep( sRunFrom, sRunTo )
-	rgsBody = oApp.prepCommissionByRep( fHTML, rgsBody )
-
-	rgsBody = oApp.prepFooter( fHTML, rgsBody )
-
-	oApp.finish()
-
-	print( "\n".join( rgsBody ) )
+	print oApp.run( sRunFrom, sRunTo, False )
 
 	return 0
 

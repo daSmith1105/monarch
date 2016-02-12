@@ -1,0 +1,33 @@
+<div>
+
+	<table dojoAttachPoint="tblHeader" align="center" border="0" cellspacing="0" cellpadding="0" width="800">
+
+		<!-- Header -->
+		<tr valign="bottom">
+			<td align="left"><img src="${_imgLogo}" alt="Dividia Technologies, LLC Logo" width="301" height="55" /></td>
+			<td align="right">Dividia Control Center (Monarch)<br /><span class="copyright">${_sCopyright}</span></td>
+		</tr>
+		<tr><td colspan="2"><hr /></td></tr>
+		<tr valign="top">
+			<td align="left" dojoAttachPoint="tdMenu"></td>
+			<td align="right"><a href="#" dojoAttachPoint="btnLogout">Logout</a></td>
+		</tr>
+		<!-- End Header -->
+
+	</table>
+
+	<h1>TigerPaw Reports</h1>
+
+	<div style="align: center; text-align: center; padding: 5px;">
+		<select size="1" dojoAttachPoint="cbxReport">
+		</select>
+		&nbsp;&nbsp;
+		<input type="text" value="" size="15" maxlength="10" dojoAttachPoint="entDateFrom" />
+		<input type="text" value="" size="15" maxlength="10" dojoAttachPoint="entDateTo" />
+		&nbsp;&nbsp;
+		<input type="button" value="Run" dojoAttachPoint="btnRun" />
+	</div>
+
+	<div dojoAttachPoint="divPrice" style="align: center; margin: 0 auto; padding: 10px;"></div>
+
+</div>

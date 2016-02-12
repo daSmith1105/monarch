@@ -20,6 +20,7 @@ dojo.declare(
 		btnRegistrations: null,
 		btnCamera: null,
 		btnPriceList: null,
+		btnReport: null,
 		btnCustomers: null,
 		btnEvents: null,
 		btnQuotes: null,
@@ -50,7 +51,8 @@ dojo.declare(
 			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnLogout,"screen-change-logout");
 			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnRegistrations,"screen-change-registrations");
 			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnCamera,"screen-change-camfail");
-			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnPriceList,"screen-change-pricelist");
+			//(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnPriceList,"screen-change-pricelist");
+			(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnReport,"screen-change-tpreport");
 			//(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnCustomers,"screen-change-customers");
 			//(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnEvents,"screen-change-events");
 			//(function(btn,sCommand){dojo.connect(btn,"onclick",null,function(e){oListener.actionPerformed(sCommand);});})(this.btnQuotes,"screen-change-quotes");
