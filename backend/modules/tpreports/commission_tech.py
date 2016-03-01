@@ -142,7 +142,7 @@ class App:
 
 		self._oCursor.execute( """
 			SELECT L.SONumber, R.RepName, A.AccountName, L.TimeLogReason, L.LogHours, L.LogMinutes, L.StartDateTime, L.EndDateTime,
-				( SELECT DISTINCT COUNT( Q.Tech ) FROM tblSOLogs AS Q WHERE L.SONumber=Q.SONumber ) AS Count
+				( SELECT COUNT( DISTINCT Q.Tech ) FROM tblSOLogs AS Q WHERE L.SONumber=Q.SONumber ) AS Count
 			FROM tblSOLogs AS L, tblReps AS R, tblAccounts AS A
 			WHERE
 				L.Tech=R.RepNumber AND
