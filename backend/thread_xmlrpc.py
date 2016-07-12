@@ -4,11 +4,16 @@
 # Includes
 #
 # Threading
-import threading
+import os, sys, threading
+sys.path.append( 'lib/jsonrpclib' )
 # XMLRPC Server
-import SocketServer, SimpleXMLRPCServer, threading, socket, select
+import SocketServer, socket, select
+from SimpleXMLRPCServer import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
+# JSON-RPC Server
+from jsonrpclib.SimpleJSONRPCServer import SimpleJSONRPCServer, SimpleJSONRPCRequestHandler
 # Logging
 from lib.messaging import stdMsg, dbgMsg, errMsg
+import fcntl
 
 # Library
 import lib.cache
@@ -41,7 +46,11 @@ import modules.tigerpaw
 
 
 SERVER_PORT = 9000
+SERVER_PORT_JSON = 9001
 MAGIC = 'dtech'
+
+# Experimental JSON-RPC Support
+ENABLE_JSON = True
 
 class ThreadXmlRpc(threading.Thread):
 
@@ -51,19 +60,40 @@ class ThreadXmlRpc(threading.Thread):
 		self.sName = sName
 		self.fRunning = False     # Are we actually running?
 		self.fStop = False        # Stop requested by parent
-		self.oServer = None
+		self.oServerXML = None
+		self.oServerJSON = None
 
 		self.rgoThread = rgoThread
+
+		self.initCache()
 
 	def run(self):
 		try:
 			self.fRunning = True
 
-			self.oServer = XmlRpcServer('', SERVER_PORT, self.rgoThread)
+			self.oServerXML = XmlRpcServer('', SERVER_PORT, self)
+			if ENABLE_JSON:
+				self.oServerJSON = JsonRpcServer('', SERVER_PORT_JSON, self)
+
+			# Make sure our children do not inherit our socket
+			# Found at http://mail.python.org/pipermail/python-list/2007-July/621680.html
+			if sys.modules.has_key( 'fcntl' ):
+				bFlags = fcntl.fcntl( self.oServerXML.fileno(), fcntl.F_GETFD )
+				fcntl.fcntl( self.oServerXML.fileno(), fcntl.F_SETFD, bFlags | fcntl.FD_CLOEXEC )
+				if ENABLE_JSON:
+					bFlags = fcntl.fcntl( self.oServerJSON.fileno(), fcntl.F_GETFD )
+					fcntl.fcntl( self.oServerJSON.fileno(), fcntl.F_SETFD, bFlags | fcntl.FD_CLOEXEC )
+
 			while not self.fStop:
-				rgbRead, rgbWrite, rgbErr = select.select( [ self.oServer.socket ], [], [], 5 )
+				rgbSocket = [ self.oServerXML.socket ]
+				if ENABLE_JSON:
+					rgbSocket.append( self.oServerJSON.socket )
+				rgbRead, rgbWrite, rgbErr = select.select( rgbSocket, [], [], 5 )
 				if len( rgbRead ) > 0:
-					self.oServer.handle_request()
+					if self.oServerXML.socket in rgbRead:
+						self.oServerXML.handle_request()
+					elif self.oServerJSON is not None and self.oServerJSON.socket in rgbRead:
+						self.oServerJSON.handle_request()
 
 			self.fRunning = False
 
@@ -79,13 +109,45 @@ class ThreadXmlRpc(threading.Thread):
 		return self.fRunning
 
 	def reloadConfig(self):
-		self.oServer.reloadConfig()
+		""" Called after a SIGHUP to reload config from db. """
 
+		stdMsg( 'reloading configuration' )
+		libCache = lib.cache.Cache()
+		libCache.get('dbPriceList')._load()
 
-class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
+		# Reload crash report skip list
+		libCache.get( 'modCrash' )._getSkipList()
 
-	def is_rpc_path_valid(self):
-		return True
+	def initCache(self):
+		# Initialize cache (watch dependencies here)
+		libCache = lib.cache.Cache()
+		libCache.set('dbAccessList', db.acl.AccessList())
+		libCache.set('dbRightList', db.rights.RightList())
+		libCache.set('dbSessionList', db.session.SessionList())
+		libCache.set('dbServerList', db.server.ServerList())
+		libCache.set('dbCameraList', db.camera.CameraList())
+		libCache.set('dbPriceList', db.pricelist.PriceList())
+		libCache.set('dbDVSLogList',db.dvslog.DVSLogList())
+		libCache.set('dbMisc', db.misc.Misc())
+		libCache.set('libUtil', lib.util.Util())
+		libCache.set('dbUserList', db.user.UserList())
+		libCache.set('modKey', modules.key.Key())
+		libCache.set('modConfigUser', modules.config.user.User())
+		libCache.set('modConfigServer', modules.config.server.Server())
+		libCache.set('modConfigCamera', modules.config.camera.Camera())
+		libCache.set('modConfigPricelist', modules.config.pricelist.PriceList())
+		libCache.set('modAuth', modules.auth.Auth())
+		libCache.set('modStats', modules.stats.Stats())
+		libCache.set('modDvslog',modules.dvslog.DVSLog())
+		libCache.set('modCrash',modules.crash.Crash())
+		libCache.set('modTicket', modules.ticket.Ticket())
+		libCache.set('modCustomer', modules.customer.Customer())
+		libCache.set('modTigerpaw', modules.tigerpaw.Tigerpaw())
+
+		# Hook up Process Control Handlers
+		#libCache.get('modUtil')._controlProcess += self.rgoThread['ProcessControl'].controlProcess
+
+		dbgMsg('loaded cache objects')
 
 	def _parseRequest(self, sRequest):
 		
@@ -155,16 +217,7 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 
 		return False
 
-	def _getRemoteIP( self ):
-		""" Find IP of remote client. """
-
-		if self.headers.has_key( 'x-forwarded-for' ) and \
-		   self.headers[ 'x-forwarded-for' ] != '':
-			return self.headers[ 'x-forwarded-for' ].split( ',' )[ 0 ]
-
-		return self.client_address[ 0 ]
-
-	def _dispatch(self, sRequest, rgoParam):
+	def _dispatch(self, sRequest, rgoParam, sRemoteIP):
 		# Okay, let's check our subclasses
 		try:
 			libCache = lib.cache.Cache()
@@ -200,7 +253,7 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 			# Inject Remote IP into UpdateIP call
 			if sModule == 'modStats' and ( sMethod == 'updateIP' or sMethod == 'newserver' ):
 				rgoParam = list( rgoParam )
-				rgoParam.insert( 1, self._getRemoteIP() )
+				rgoParam.insert( 1, sRemoteIP )
 				rgoParam = tuple( rgoParam )
 
 			# Alright, let's call it
@@ -214,6 +267,7 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 			]
 
 		except AttributeError, e:
+			errMsg( e )
 			# Oops it wasn't found, throw an error
 			sMsg = 'method "%s" is not supported' % sRequest
 			stdMsg(sMsg)
@@ -238,63 +292,80 @@ class XmlRpcDispatch(SimpleXMLRPCServer.SimpleXMLRPCRequestHandler):
 				if sRequest not in rgsSkipLog:
 					dbgMsg('%s returning' % sRequest)
 
+## XML-RPC
+class XmlRpcDispatch(SimpleXMLRPCRequestHandler):
 
-class XmlRpcServer(SocketServer.ThreadingMixIn, SimpleXMLRPCServer.SimpleXMLRPCServer):
+	def is_rpc_path_valid(self):
+		return True
+
+	def _getRemoteIP( self ):
+		""" Find IP of remote client. """
+
+		try:
+			if self.headers.has_key( 'x-forwarded-for' ) and \
+				 self.headers[ 'x-forwarded-for' ] != '':
+				return self.headers[ 'x-forwarded-for' ].split( ',' )[ 0 ]
+
+			return self.client_address[ 0 ]
+
+		except Exception, e:
+			errMsg( 'error getting remote ip from client [%s]' % e )
+			return ''
+
+	def _dispatch(self, sRequest, rgoParam):
+		return self.server.oParent._dispatch( sRequest, rgoParam, self._getRemoteIP() )
+
+	def handle_error(self, request, client_address):
+		errMsg('Error communicating with client-[%s]' % client_address[0])
+
+class XmlRpcServer(SocketServer.ThreadingMixIn, SimpleXMLRPCServer):
 	def __init__(self, *args):
-		SimpleXMLRPCServer.SimpleXMLRPCServer.__init__(self,addr=(args[0], args[1]), requestHandler=XmlRpcDispatch, logRequests=0)
+		SimpleXMLRPCServer.__init__(self,addr=(args[0], args[1]), requestHandler=XmlRpcDispatch, logRequests=0)
 
-		# Initialize cache (watch dependencies here)
-		libCache = lib.cache.Cache()
-		libCache.set('dbAccessList', db.acl.AccessList())
-		libCache.set('dbRightList', db.rights.RightList())
-		libCache.set('dbSessionList', db.session.SessionList())
-		libCache.set('dbServerList', db.server.ServerList())
-		libCache.set('dbCameraList', db.camera.CameraList())
-		libCache.set('dbPriceList', db.pricelist.PriceList())
-		libCache.set('dbDVSLogList',db.dvslog.DVSLogList())
-		libCache.set('dbMisc', db.misc.Misc())
-		libCache.set('libUtil', lib.util.Util())
-		libCache.set('dbUserList', db.user.UserList())
-		libCache.set('modKey', modules.key.Key())
-		libCache.set('modConfigUser', modules.config.user.User())
-		libCache.set('modConfigServer', modules.config.server.Server())
-		libCache.set('modConfigCamera', modules.config.camera.Camera())
-		libCache.set('modConfigPricelist', modules.config.pricelist.PriceList())
-		libCache.set('modAuth', modules.auth.Auth())
-		libCache.set('modStats', modules.stats.Stats())
-		libCache.set('modDvslog',modules.dvslog.DVSLog())
-		libCache.set('modCrash',modules.crash.Crash())
-		libCache.set('modTicket', modules.ticket.Ticket())
-		libCache.set('modCustomer', modules.customer.Customer())
-		libCache.set('modTigerpaw', modules.tigerpaw.Tigerpaw())
+		self.oParent = args[ 2 ]
 
-		# Hook up Process Control Handlers
-		#libCache.get('modUtil')._controlProcess += self.rgoThread['ProcessControl'].controlProcess
-
-		dbgMsg('loaded acl-[%d] right-[%d] session-[%d] server-[%d] user-[%d]' % \
-			(
-				libCache.get('dbAccessList').size(),
-				libCache.get('dbRightList').size(),
-				libCache.get('dbSessionList').size(),
-				libCache.get('dbServerList').size(),
-				libCache.get('dbUserList').size()
-			)
-		)
-
-	def reloadConfig(self):
-		""" Called after a SIGHUP to reload config from db. """
-
-		stdMsg( 'reloading configuration' )
-		libCache = lib.cache.Cache()
-		libCache.get('dbPriceList')._load()
-
-		# Reload crash report skip list
-		libCache.get( 'modCrash' )._getSkipList()
+		stdMsg( 'Started XML-RPC Server' )
 
 	def server_bind(self):
 		# Make sure we can reuse this socket
 		self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		SimpleXMLRPCServer.SimpleXMLRPCServer.server_bind(self)
+		SimpleXMLRPCServer.server_bind(self)
+
+## JSON-RPC
+class JsonRpcDispatch(SimpleJSONRPCRequestHandler):
+
+	def is_rpc_path_valid(self):
+		return True
+
+	def _getRemoteIP( self ):
+		""" Find IP of remote client. """
+
+		try:
+			if self.headers.has_key( 'x-forwarded-for' ) and \
+				 self.headers[ 'x-forwarded-for' ] != '':
+				return self.headers[ 'x-forwarded-for' ].split( ',' )[ 0 ]
+
+			return self.client_address[ 0 ]
+
+		except Exception, e:
+			errMsg( 'error getting remote ip from client [%s]' % e )
+			return ''
+
+	def _dispatch(self, sRequest, rgoParam):
+		return self.server.oParent._dispatch( sRequest, rgoParam, self._getRemoteIP() )
 
 	def handle_error(self, request, client_address):
 		errMsg('Error communicating with client-[%s]' % client_address[0])
+
+class JsonRpcServer(SocketServer.ThreadingMixIn, SimpleJSONRPCServer):
+	def __init__(self, *args):
+		SimpleJSONRPCServer.__init__(self,addr=(args[0], args[1]), requestHandler=JsonRpcDispatch, logRequests=0)
+
+		self.oParent = args[ 2 ]
+
+		stdMsg( 'Started JSON-RPC Server' )
+
+	def server_bind(self):
+		# Make sure we can reuse this socket
+		self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		SimpleJSONRPCServer.server_bind(self)

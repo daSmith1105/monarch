@@ -399,3 +399,21 @@ class Stats:
 		except Exception, e:
 			errMsg( 'error serving alive call [%s]' % e )
 			raise Exception, "System error serving alive call."
+
+	def lookupByCompanyCode( self, sCompanyCode ):
+		""" Find the IP information by company code. """
+
+		try:
+			for oServer in self._dbServerList.getList():
+				if not oServer.checkHasCategory( sCompanyCode ): continue
+				if oServer.getController() != 0: continue
+				result = oServer.getIP()
+				if oServer.getPort() != 80:
+					result += ":%d" % oServer.getPort()
+				return (True,result)
+
+			return (True,"")
+
+		except Exception, e:
+			errMsg( 'error looking up company code [%s]' % e )
+			raise Exception, "System error looking up ip by company code."
