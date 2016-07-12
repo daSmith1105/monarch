@@ -82,7 +82,7 @@ class App:
 				P.ItemID=I.ItemID AND
 				S.RepToCredit=R.RepNumber AND
 				S.AccountNumber=A.AccountNumber AND
-				( I.Type<>'L' AND I.ItemID<>'DOWNPAYMENT' AND I.ItemID<>'SHIPPING' AND I.ItemID<>'TRAVEL EXPENSE' AND I.ItemID<>'TRIP CHARGE' ) AND
+				( I.Type<>'L' AND I.ItemID<>'DOWNPAYMENT' AND I.ItemID<>'SHIPPING' AND I.ItemID<>'TRAVEL EXPENSE' AND I.ItemID<>'TRIP CHARGE' AND I.ItemID<>'MILEAGE' ) AND
 				( S.DateClosed>=%s AND S.DateClosed<=%s ) AND
 				( S.SOType='Installation' OR S.SOType='Ship Only' ) AND
 				( S.Status='Closed' OR S.Status='Complete' OR S.Status='Complete with Email' OR S.Status='Ready for Billing' OR S.Status='Ready for Billing / Waiting on RMA')

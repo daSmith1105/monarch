@@ -277,7 +277,7 @@ class ThreadBugzilla( threading.Thread ):
 		""" Open new bug in bugzilla.  """
 
 		try:
-			time.sleep( 5 )
+			time.sleep( 10 )
 
 			if bCamera is None:
 				dbgMsg( 'Opening Bug [%s] serial-[%d] company-[%s] name-[%s]' % \
@@ -296,22 +296,22 @@ class ThreadBugzilla( threading.Thread ):
 			if sType == "Offline":
 				sFileIn = BASE + 'templates/dvs-offline.bug'
 				sFileOut = '/tmp/dvs-offline.bug'
-				sAssignee = 'mlaplante@dividia.net'
+				sAssignee = 'bugzilla@dividia.net'
 
 			elif sType == "Camera Down":
 				sFileIn = BASE + 'templates/camera-down.bug'
 				sFileOut = '/tmp/camera-down.bug'
-				sAssignee = 'mlaplante@dividia.net'
+				sAssignee = 'bugzilla@dividia.net'
 
 			elif sType == "Maintenance Reminder":
 				sFileIn = BASE + 'templates/maintenance-reminder.bug'
 				sFileOut = '/tmp/maintenance-reminder.bug'
-				sAssignee = 'mlaplante@dividia.net'
+				sAssignee = 'bugzilla@dividia.net'
 
 			elif sType == "Weekly Check":
 				sFileIn = BASE + 'templates/weekly-check.bug'
 				sFileOut = '/tmp/weekly-check.bug'
-				sAssignee = 'mlaplante@dividia.net'
+				sAssignee = 'bugzilla@dividia.net'
 
 			elif sType == "On-Site Maintenance":
 				sFileIn = BASE + 'templates/onsite-maintenance.bug'
@@ -332,20 +332,20 @@ class ThreadBugzilla( threading.Thread ):
 			sAssignee = sAssignee.replace( '"', "_" )
 
 			os.system( 'cp %s %s' % ( sFileIn, sFileOut ) )
-			os.system( "perl -pi -e \"s/\@\@SERIAL\@\@/%03d/g\" %s" % ( bSerial, sFileOut ) )
-			os.system( "perl -pi -e \"s/\@\@COMPANY\@\@/%s/g\" %s" % ( re.escape( sCompany ), sFileOut ) )
-			os.system( "perl -pi -e \"s/\@\@NAME\@\@/%s/g\" %s" % ( re.escape( sName ), sFileOut ) )
-			os.system( "perl -pi -e \"s/\@\@ASSIGNEE\@\@/%s/g\" %s" % ( re.escape( sAssignee ), sFileOut ) )
+			os.system( "perl -pi -e \"s|\@\@SERIAL\@\@|%03d|g\" %s" % ( bSerial, sFileOut ) )
+			os.system( "perl -pi -e \"s|\@\@COMPANY\@\@|%s|g\" %s" % ( re.escape( sCompany ), sFileOut ) )
+			os.system( "perl -pi -e \"s|\@\@NAME\@\@|%s|g\" %s" % ( re.escape( sName ), sFileOut ) )
+			os.system( "perl -pi -e \"s|\@\@ASSIGNEE\@\@|%s|g\" %s" % ( re.escape( sAssignee ), sFileOut ) )
 			if bCamera is not None:
-				os.system( "perl -pi -e \"s/\@\@CAMERA\@\@/%03d/g\" %s" % ( bCamera, sFileOut ) )
+				os.system( "perl -pi -e \"s|\@\@CAMERA\@\@|%03d|g\" %s" % ( bCamera, sFileOut ) )
 			if sSummary is not None:
-				os.system( "perl -pi -e \"s/\@\@SUMMARY\@\@/%s/g\" %s" % ( sSummary, sFileOut ) )
+				os.system( "perl -pi -e \"s|\@\@SUMMARY\@\@|%s|g\" %s" % ( sSummary, sFileOut ) )
 			if sDescription is not None:
-				os.system( "perl -pi -e \"s/\@\@DESCRIPTION\@\@/%s/g\" %s" % ( sDescription, sFileOut ) )
+				os.system( "perl -pi -e \"s|\@\@DESCRIPTION\@\@|%s|g\" %s" % ( sDescription, sFileOut ) )
 
-			os.system( "perl -pi -e \"s/@/\\\\\\@/g\" %s" % sFileOut )
+			os.system( "perl -pi -e \"s|@|\\\\\\@|g\" %s" % sFileOut )
 
-			bStatus = os.system( '/usr/local/bin/bz_webservice_demo.pl --uri http://tickets.dividia.net/xmlrpc.cgi --rememberlogin --login bugzilla --password \'dt!8734\' --create %s 2>/dev/null' % sFileOut )
+			bStatus = os.system( '/usr/local/bin/bz_webservice_demo.pl --uri http://tickets.dividia.net/xmlrpc.cgi --rememberlogin --login bugzilla --password \'dt!8734\' --create %s 1>/dev/null 2>/dev/null' % sFileOut )
 			os.unlink( sFileOut )
 
 			if not os.WIFEXITED( bStatus ):
@@ -552,12 +552,14 @@ class ThreadBugzilla( threading.Thread ):
 			sLastRun = self._dbMisc.get( 'bugzilla', 'dvs-log-last' )
 			for oLog in self._dbDVSLogList.getList( sLastRun ):
 
+				bEvent = oLog.getEventID()
+
 				# Kernel Oops
-				if oLog.getEventID() == 20000:
+				if 20000 <= bEvent <= 20999:
 					sTitle = 'Kernel Oops'
 
 				# System Load
-				elif oLog.getEventID() == 21000:
+				elif 21000 <= bEvent <= 21999:
 					# See if our load is too high
 					try:
 						rgb = oLog.getData()[ 6: ].split( ',' )
@@ -569,15 +571,15 @@ class ThreadBugzilla( threading.Thread ):
 						continue
 
 				# Capture Card Error
-				elif oLog.getEventID() == 41000:
+				elif 41000 <= bEvent <= 41999:
 					sTitle = 'Capture Card Error'
 
 				# Disk Report
-				elif oLog.getEventID() >= 51000 and oLog.getEventID() <= 51100:
+				elif 51000 <= bEvent <= 51999:
 					sTitle = 'Disk Report'
 
 				# Camera Record Issue
-				elif oLog.getEventID() == 61000:
+				elif 61000 <= bEvent <= 61999:
 					sTitle = 'Camera Record Issue'
 
 				# VMD
@@ -585,7 +587,7 @@ class ThreadBugzilla( threading.Thread ):
 					sTitle = 'VMD Issue'
 
 				# DB Issue
-				elif oLog.getEventID() == 65000:
+				elif 65000 <= bEvent <= 65999:
 					sTitle = 'DB Issue'
 
 				# System Config
@@ -598,7 +600,7 @@ class ThreadBugzilla( threading.Thread ):
 
 				# Make sure we do not already have a ticket open
 				sQuery = "SELECT version FROM bugs WHERE " + \
-					"version='" + oLog.getSerial() + "' AND " + \
+					"version='" + str( oLog.getSerial() ) + "' AND " + \
 					"short_desc LIKE 'DVS Log - % - " + sTitle + "' AND " + \
 					"((bug_status<>'RESOLVED') OR (bug_status='RESOLVED' AND (resolution='REMIND' OR resolution='LATER' OR resolution='WONTFIX')))"
 				oResult = self._libDBbug.query( sQuery )
@@ -623,7 +625,7 @@ class ThreadBugzilla( threading.Thread ):
 					oServer.getCompany(),
 					oServer.getName(),
 					sSummary=sTitle,
-					sDescrption=oLog.getData()
+					sDescription=oLog.getData()
 				):
 					bCount += 1
 

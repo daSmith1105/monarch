@@ -29,7 +29,7 @@ class DVSLogEntry:
 
 		# Stuff we store in the Database        
 		self._bID = bID                   # DVSLogEntry ID Number (For ease in DB operations)
-		self._sSerial = bSerial           # Serial number of the DVS
+		self._bSerial = bSerial           # Serial number of the DVS
 		self._bEventID = bEventID         # Event ID
 		self._sData = sData               # Data in Event Message
 		self._sTimeStamp = None           # When did we last see this error  

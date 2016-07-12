@@ -135,10 +135,17 @@ class App:
 				bCompany += bHours
 				sType = 'Company'
 
+			sComment = ''
+			if oRow[ 'TaskComment' ] is not None and len( oRow[ 'TaskComment' ] ) > 0:
+				sComment = oRow[ 'TaskComment' ].replace( '\r\n', ' ' )[ 0:28 ]
+			# Remove default TP Comment like 'Ryan Ayers at Dividia'
+			if sComment[0:10] == 'Ryan Ayers':
+				sComment = ''
+
 			rgsBody.append( '<tr><td>%s</td><td>%s</td><td>%s</td><td align="right">%s</td><td align="right">%d</td></tr>' % (
 				oStart.strftime( '%m/%d/%Y' ),
 				sType,
-				oRow[ 'TaskComment' ].replace( '\r\n', ' ' )[ 0:28 ],
+				sComment,
 				'%sHR' % bHours,
 				oRow[ 'TaskCompletedIndicator' ]
 			) )
@@ -202,10 +209,16 @@ class App:
 				bCompany += bHours
 				sType = 'Company'
 
+			sComment = ''
+			if oRow[ 'TaskComment' ] is not None and len( oRow[ 'TaskComment' ] ) > 0:
+				sComment = oRow[ 'TaskComment' ].replace( '\r\n', ' ' )[ 0:28 ]
+			# Remove default TP Comment like 'Ryan Ayers at Dividia'
+			if sComment == 'Ryan Ayers at DIVIDIA (817)	': sComment = ''
+
 			rgsBody.append( '%-12s%-10s%-30s%-12s%d' % (
 				oStart.strftime( '%m/%d/%Y' ),
 				sType,
-				oRow[ 'TaskComment' ].replace( '\r\n', ' ' )[ 0:28 ],
+				sComment,
 				'%sHR' % bHours,
 				oRow[ 'TaskCompletedIndicator' ]
 			) )
@@ -257,7 +270,7 @@ def main( argv ):
 	sRunTo = '2016-12-31'
 
 	oApp = App()
-	print oApp.run( sRunFrom, sRunTo, False )
+	print oApp.run( sRunFrom, sRunTo, True )
 
 	return 0
 
