@@ -634,6 +634,12 @@ dojo.declare(
 						s += ',';
 					s += sValue;
 					this.oView.setFeatures( s );
+					// Set POS/LPR Lock defaults if we add those items
+					if ( sValue == 'pos' ) {
+						this.oView.setPosLock( 2 );
+					} else if ( sValue == 'lpr' ) {
+						this.oView.setLprLock( 2 );
+					}
 
 				} else {
 					var rgs = this.oView.getFeatures().split( ',' );

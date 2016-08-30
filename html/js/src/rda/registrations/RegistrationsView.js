@@ -998,6 +998,10 @@ dojo.declare(
 		{
 			return this.entPosLock.value;
 		},
+		setPosLock: function( s )
+		{
+			this.entPosLock.value = s;
+		},
 		getMac: function()
 		{
 			return this.entMac.value;
@@ -1025,6 +1029,10 @@ dojo.declare(
 		getLprLock: function()
 		{
 			return this.entLprLock.value;
+		},
+		setLprLock: function( s )
+		{
+			this.entLprLock.value = s;
 		},
 		getKill: function()
 		{
