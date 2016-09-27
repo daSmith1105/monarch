@@ -417,3 +417,52 @@ class Stats:
 		except Exception, e:
 			errMsg( 'error looking up company code [%s]' % e )
 			raise Exception, "System error looking up ip by company code."
+
+	def _freezeServer(self, oServer):
+		""" Flatten server object to associative array. """
+
+		try:
+			rgsServer = {}
+			rgsServer['bSerial'] = oServer.getSerial()
+			if rgsServer['bSerial'] is None: rgsServer['bSerial'] = 0
+			rgsServer['sCompany'] = oServer.getCompany()
+			if rgsServer['sCompany'] is None: rgsServer['sCompany'] = ''
+			rgsServer['sName'] = oServer.getName()
+			if rgsServer['sName'] is None: rgsServer['sName'] = ''
+			rgsServer['sIP'] = oServer.getIP()
+			if rgsServer['sIP'] is None: rgsServer['sIP'] = '000.000.000.000'
+			#rgsServer['sRemoteIP'] = oServer.getRemoteIP()
+			#if rgsServer['sRemoteIP'] is None: rgsServer['sRemoteIP'] = '000.000.000.000'
+			rgsServer['sLocalIP'] = oServer.getLocalIP()
+			if rgsServer['sLocalIP'] is None: rgsServer['sLocalIP'] = '000.000.000.000'
+			rgsServer['bPort'] = oServer.getPort()
+			if rgsServer['bPort'] is None: rgsServer['bPort'] = 80
+
+			return rgsServer
+
+		except Exception, e:
+			raise Exception, 'error freezing server [%s]' % e
+
+	def autocompleteServer( self, sSearch ):
+		""" Find list of server names starting with search string. """
+
+		try:
+			result = []
+
+			for oServer in self._dbServerList.getList( sSearch=sSearch ):
+				if oServer.getName() == sSearch or oServer.checkHasCategory( sSearch ):
+					# Matches exactly, so include no matter what
+					result.append( self._freezeServer( oServer ) )
+					continue
+
+				# Filter out any that don't have video as a tag (meaning customer has requested we not show them in our list of results)
+				if not oServer.checkHasCategory( 'video' ): continue
+				if oServer.getPreferred() in [ 'test', 'closed', 'inactive', 'lost' ]: continue
+
+				result.append( self._freezeServer( oServer ) )
+
+			return ( True, result )
+
+		except Exception, e:
+			errMsg( 'error looking up autocomplete list [%s]' % e )
+			raise Exception, "System error looking up autocomplete list."

@@ -392,7 +392,7 @@ class ServerList:
 
 		return len( self.getList() )
 
-	def getList( self ):
+	def getList( self, sSearch=None ):
 		""" Return list copy of our servers. """
 
 		try:
@@ -401,9 +401,16 @@ class ServerList:
 			try:
 				rgoServer = []
 
-				rgoResult = self._libDB.query( 'SELECT bSerial, sCompany, sName, sCategories, sPreferred, sIP, sRemoteIP, sLocalIP, bPort, bSshPort, sHostname, UNIX_TIMESTAMP(dTimestamp), UNIX_TIMESTAMP(dInstall), sMaintenance, UNIX_TIMESTAMP(dMaintenanceOnsite), fSkip, fSick, bController, sOS, sVersionInstalled, sVersion, bNumcam, sMac, sKey, sKeyPos, bPos, sKill, fEnterprise, fAuth, sSeed, sFeatures, sPosTypes, bLpr FROM Server ORDER BY bSerial' )
+				sQuery = 'SELECT bSerial, sCompany, sName, sCategories, sPreferred, sIP, sRemoteIP, sLocalIP, bPort, bSshPort, sHostname, UNIX_TIMESTAMP(dTimestamp), UNIX_TIMESTAMP(dInstall), sMaintenance, UNIX_TIMESTAMP(dMaintenanceOnsite), fSkip, fSick, bController, sOS, sVersionInstalled, sVersion, bNumcam, sMac, sKey, sKeyPos, bPos, sKill, fEnterprise, fAuth, sSeed, sFeatures, sPosTypes, bLpr FROM Server'
 
-				for oRow in rgoResult:
+				if sSearch is not None:
+					sQuery += ' WHERE sName LIKE \'' + sSearch + '%\' OR sCategories LIKE \'' + sSearch + '%\''
+					sQuery += ' ORDER BY sName'
+
+				else:
+					sQuery += ' ORDER BY bSerial'
+
+				for oRow in self._libDB.query( sQuery ):
 					rgoServer.append(
 						ServerEntry(
 							oRow[0],
