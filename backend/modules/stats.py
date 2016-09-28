@@ -11,6 +11,7 @@ import os, time, threading
 from lib.messaging import stdMsg, dbgMsg, errMsg
 # Internal
 import lib.cache
+from db.server import ServerEntry
 
 class Stats:
 
@@ -46,7 +47,7 @@ class Stats:
 			errMsg('error while generating server ip list [%s]' % e)
 			raise Exception, "System error while generating server ip list."
 
-	def updateIP( self, bSerial, sIPLookup, sIP=None, bPort=None, bSerialController=0 ):
+	def updateIP( self, bSerial, sIPLookup, sIP=None, bPort=None, bSerialController=0, sLocalIP=None ):
 		""" Update IP address, Port, and Heartbeat for this Server """
 
 		try:
@@ -102,6 +103,8 @@ class Stats:
 			# Finally, save updates to server object
 			oServer.setIP( sIP )
 			oServer.setRemoteIP( sIPLookup )
+			if sLocalIP is not None:
+				oServer.setLocalIP( sLocalIP )
 			oServer.setPort( bPort )
 			oServer.setController( bSerialController )
 			oServer.setTimestamp( time.time() )
@@ -404,19 +407,34 @@ class Stats:
 		""" Find the IP information by company code. """
 
 		try:
-			for oServer in self._dbServerList.getList():
-				if not oServer.checkHasCategory( sCompanyCode ): continue
-				if oServer.getController() != 0: continue
-				result = oServer.getIP()
-				if oServer.getPort() != 80:
-					result += ":%d" % oServer.getPort()
-				return (True,result)
+			( status, server ) = self.lookupServerByCompanyCode( sCompanyCode )
+			if server[ "bSerial" ] == 0:
+				return ( True, "" )
 
-			return (True,"")
+			result = server[ "sIP" ]
+			if server[ "bPort" ] != 80:
+				result += ":%d" % server[ "bPort" ]
+
+			return ( True, result )
 
 		except Exception, e:
 			errMsg( 'error looking up company code [%s]' % e )
 			raise Exception, "System error looking up ip by company code."
+
+	def lookupServerByCompanyCode( self, sCompanyCode ):
+		""" Find the Server object information by company code. """
+
+		try:
+			for oServer in self._dbServerList.getList():
+				if not oServer.checkHasCategory( sCompanyCode ): continue
+				if oServer.getController() != 0: continue
+				return ( True, self._freezeServer( oServer ) )
+
+			return ( True, self._freezeServer( ServerEntry() ) )
+
+		except Exception, e:
+			errMsg( 'error looking up server by company code [%s]' % e )
+			raise Exception, "System error looking up server by company code."
 
 	def _freezeServer(self, oServer):
 		""" Flatten server object to associative array. """
