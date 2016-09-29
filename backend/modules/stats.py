@@ -426,6 +426,9 @@ class Stats:
 
 		try:
 			for oServer in self._dbServerList.getList():
+				if oServer.getName() == sCompanyCode:
+					return ( True, self._freezeServer( oServer ) )
+
 				if not oServer.checkHasCategory( sCompanyCode ): continue
 				if oServer.getController() != 0: continue
 				return ( True, self._freezeServer( oServer ) )

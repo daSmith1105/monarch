@@ -404,13 +404,15 @@ class ServerList:
 				sQuery = 'SELECT bSerial, sCompany, sName, sCategories, sPreferred, sIP, sRemoteIP, sLocalIP, bPort, bSshPort, sHostname, UNIX_TIMESTAMP(dTimestamp), UNIX_TIMESTAMP(dInstall), sMaintenance, UNIX_TIMESTAMP(dMaintenanceOnsite), fSkip, fSick, bController, sOS, sVersionInstalled, sVersion, bNumcam, sMac, sKey, sKeyPos, bPos, sKill, fEnterprise, fAuth, sSeed, sFeatures, sPosTypes, bLpr FROM Server'
 
 				if sSearch is not None:
-					sQuery += ' WHERE sName LIKE \'' + sSearch + '%\' OR sCategories LIKE \'' + sSearch + '%\''
+					sQuery += ' WHERE sName LIKE %s OR sCategories LIKE %s'
 					sQuery += ' ORDER BY sName'
+					rgoResult = self._libDB.query( sQuery, sSearch + '%', sSearch + '%')
 
 				else:
 					sQuery += ' ORDER BY bSerial'
+					rgoResult = self._libDB.query( sQuery )
 
-				for oRow in self._libDB.query( sQuery ):
+				for oRow in rgoResult:
 					rgoServer.append(
 						ServerEntry(
 							oRow[0],
