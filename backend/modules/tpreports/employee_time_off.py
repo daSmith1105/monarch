@@ -77,6 +77,7 @@ class App:
 				tblReps R
 			WHERE
 				T.ScheduledForRepNumber = R.RepNumber AND 
+				R.Inactive = 0 AND
 				T.TaskAction = 'Time Off' AND
 				T.StartDate>=%s AND
 				T.EndDate <=%s
