@@ -6,8 +6,8 @@ import time
 from datetime import datetime
 
 DB_HOST = 'tigerpaw'
-DB_USER = 'DTECH\\rayers'
-DB_PASS = 'Mlk136!$'
+DB_USER = 'sa'
+DB_PASS = 'Y3R]=68RF4'
 DB_NAME = 'TigerPaw'
 
 
@@ -79,6 +79,7 @@ class App:
 				T.ScheduledForRepNumber = R.RepNumber AND 
 				R.Inactive = 0 AND
 				T.TaskAction = 'Time Off' AND
+				( T.Subject LIKE '%Sick%' OR T.Subject LIKE '%Vacation%' OR T.Subject LIKE '%Company%' ) AND
 				T.StartDate>=%s AND
 				T.EndDate <=%s
 			ORDER BY R.RepName, T.WholeStart
@@ -238,8 +239,8 @@ class App:
 
 		sReport = 'Employee Time Off'
 		rgsBody = []
-		sRunFrom = '2016-01-01'
-		sRunTo = '2016-12-31'
+		sRunFrom = '2017-01-01'
+		sRunTo = '2017-12-31'
 
 		self = App()
 
@@ -267,8 +268,8 @@ class App:
 
 def main( argv ):
 
-	sRunFrom = '2016-01-01'
-	sRunTo = '2016-12-31'
+	sRunFrom = '2017-01-01'
+	sRunTo = '2017-12-31'
 
 	oApp = App()
 	print oApp.run( sRunFrom, sRunTo, True )

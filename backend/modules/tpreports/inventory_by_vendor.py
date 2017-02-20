@@ -5,8 +5,8 @@ import pymssql
 import time
 
 DB_HOST = 'tigerpaw'
-DB_USER = 'DTECH\\rayers'
-DB_PASS = 'Mlk136!$'
+DB_USER = 'sa'
+DB_PASS = 'Y3R]=68RF4'
 DB_NAME = 'TigerPaw'
 
 
