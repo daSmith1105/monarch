@@ -271,7 +271,6 @@ class App:
 					sRepCheck = s
 
 			bRate = float( oRow[ 'LaborCost' ] )
-			bRate = float( 12 )
 
 			if sRep != sRepCheck:
 				if sRep != '':
