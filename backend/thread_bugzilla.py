@@ -563,7 +563,7 @@ class ThreadBugzilla( threading.Thread ):
 					# See if our load is too high
 					try:
 						rgb = oLog.getData()[ 6: ].split( ',' )
-						if float( rgb[ 2 ] ) >= 4.0:
+						if float( rgb[ 2 ] ) >= 8.0:
 							sTitle = 'System Load'
 						else:
 							continue # Skip

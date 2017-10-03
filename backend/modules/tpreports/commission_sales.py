@@ -21,6 +21,11 @@ TECH_COMM[ 'Randy Whitley' ][ 'Standard' ] = .15
 TECH_COMM[ 'Randy Whitley' ][ 'Distributor' ] = .05
 TECH_COMM[ 'Randy Whitley' ][ 'Tier' ] = .1
 TECH_COMM[ 'Randy Whitley' ][ 'TierLimit' ] = 20000
+TECH_COMM[ 'Josh Turner' ] = {}
+TECH_COMM[ 'Josh Turner' ][ 'Standard' ] = .07
+TECH_COMM[ 'Josh Turner' ][ 'Distributor' ] = .03
+TECH_COMM[ 'Josh Turner' ][ 'Tier' ] = .07
+TECH_COMM[ 'Josh Turner' ][ 'TierLimit' ] = 999999
 
 
 class App:

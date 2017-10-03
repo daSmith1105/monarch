@@ -142,7 +142,7 @@ class App:
 
 		self._oCursor.execute( """
 			SELECT L.SONumber, R.RepName, A.AccountName, L.TimeLogReason, L.LogHours, L.LogMinutes, L.StartDateTime, L.EndDateTime,
-				( SELECT COUNT( DISTINCT Q.Tech ) FROM tblSOLogs AS Q WHERE L.SONumber=Q.SONumber ) AS Count
+				( SELECT COUNT( DISTINCT Q.Tech ) FROM tblSOLogs AS Q WHERE L.SONumber=Q.SONumber ) AS Count, L.LogComment
 			FROM tblSOLogs AS L, tblReps AS R, tblAccounts AS A
 			WHERE
 				L.Tech=R.RepNumber AND
@@ -179,6 +179,13 @@ class App:
 				rgsBody.append( '<table>' )
 				rgsBody.append( '<tr><th>Date</th><th>SO</th><th>Account</th><th>Type</th><th>Time</th><th>Rate</th><th>Comm</th><th>Amount</th></tr>' )
 
+			# If this is a contractor account, then pull contractor name from Comment
+			sAccountName = oRow[ 'AccountName' ]
+			if oRow[ 'RepName' ] == 'John Doe':
+				rgs = oRow[ 'LogComment' ].split( ' - ' )
+				if len( rgs ) > 1:
+					sAccountName = '%s - %s' % ( rgs[ 0 ], sAccountName )
+
 			bCommSolo = TECH_COMM[ 'Default' ][ 'Solo' ]
 			bCommSplit = TECH_COMM[ 'Default' ][ 'Split' ]
 			if sRep in TECH_COMM.keys():
@@ -202,7 +209,7 @@ class App:
 			rgsBody.append( '<tr><td>%s</td><td>%d</td><td>%s</td><td>%s</td><td align="right">%.2f</td><td align="right">%d</td><td align="right">%d%%</td><td align="right">%0.2f</td></tr>' % (
 				oRow[ 'StartDateTime' ].strftime( '%m/%d/%Y' ),
 				oRow[ 'SONumber' ],
-				oRow[ 'AccountName' ],
+				sAccountName,
 				'%s %s' % ( oRow[ 'TimeLogReason' ], sSplit ),
 				bHours,
 				bRate,
@@ -244,6 +251,13 @@ class App:
 				rgsBody.append( '%-12s%-7s%-30s%-15s%-8s%-6s%-6s%s' % (
 					'Date', 'SO', 'Account', 'Type', 'Time', 'Rate', 'Comm', 'Amount' ) )
 
+			# If this is a contractor account, then pull contractor name from Comment
+			sAccountName = oRow[ 'AccountName' ][ 0:28 ]
+			if oRow[ 'RepName' ] == 'John Doe':
+				rgs = oRow[ 'LogComment' ].split( ' - ' )
+				if len( rgs ) > 1:
+					sAccountName = '%s - %s' % ( rgs[ 0 ], sAccountName )
+
 			bCommSolo = TECH_COMM[ 'Default' ][ 'Solo' ]
 			bCommSplit = TECH_COMM[ 'Default' ][ 'Split' ]
 			if sRep in TECH_COMM.keys():
@@ -267,7 +281,7 @@ class App:
 			rgsBody.append( '%-12s%-7d%-30s%-15s%5.2f%6d%6d%%%8.2f' % (
 				oRow[ 'StartDateTime' ].strftime( '%m/%d/%Y' ),
 				oRow[ 'SONumber' ],
-				oRow[ 'AccountName' ][ 0:28 ],
+				sAccountName,
 				'%s %s' % ( oRow[ 'TimeLogReason' ], sSplit ),
 				bHours,
 				bRate,
