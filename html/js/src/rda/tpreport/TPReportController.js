@@ -115,7 +115,7 @@ dojo.declare(
 			if ( this.fBlockUpdate ) return;
 
 			//TODO: Change button parameters here based on what this report needs
-			if ( this._bReportCurr == 3 || this._bReportCurr == 4 ) {
+			if ( this._bReportCurr == 3 || this._bReportCurr == 4 || this._bReportCurr == 6 ) {
 				// Commission reports, need a date range
 				this.oView.toggleDateWidgets( true );
 
@@ -130,7 +130,7 @@ dojo.declare(
 		{
 			// Lock down certain reports for security
 			if ( this.oAuthModel.getName() != "rayers" && this.oAuthModel.getName() != "mlaplante" && this.oAuthModel.getName() != "sheila" && 
-			     ( this._bReportCurr == 3 || this._bReportCurr == 4 ) ) {
+			     ( this._bReportCurr == 3 || this._bReportCurr == 4 || this._bReportCurr == 6 ) ) {
 				alert( 'You do not have access to run this report.' );
 				return;
 			}
@@ -140,7 +140,7 @@ dojo.declare(
 			if ( sDateFrom == '' ) sDateFrom = '2016-01-01';
 			if ( sDateTo == '' ) sDateTo = '2016-01-01';
 
-			if ( this._bReportCurr == 3 || this._bReportCurr == 4 )
+			if ( this._bReportCurr == 3 || this._bReportCurr == 4 || this._bReportCurr == 6 )
 				var sHTML = this.oTPReportModel.runReport( this._bReportCurr, sDateFrom, sDateTo );
 			else
 				var sHTML = this.oTPReportModel.runReport( this._bReportCurr );
