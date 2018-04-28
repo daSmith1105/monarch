@@ -239,8 +239,8 @@ class App:
 
 		sReport = 'Employee Time Off'
 		rgsBody = []
-		sRunFrom = '2017-01-01'
-		sRunTo = '2017-12-31'
+		sRunFrom = '2018-01-01'
+		sRunTo = '2018-12-31'
 
 		self = App()
 
@@ -268,8 +268,8 @@ class App:
 
 def main( argv ):
 
-	sRunFrom = '2017-01-01'
-	sRunTo = '2017-12-31'
+	sRunFrom = '2018-01-01'
+	sRunTo = '2018-12-31'
 
 	oApp = App()
 	print oApp.run( sRunFrom, sRunTo, True )

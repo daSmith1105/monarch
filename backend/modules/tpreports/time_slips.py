@@ -29,11 +29,15 @@ class App:
 
 	def _getAdjustedTime( self, oRow ):
 
+		bLogTime = oRow[ 'LogHours' ] + ( oRow[ 'LogMinutes' ] / 60.0 )
+		bDeductTime = oRow[ 'DeductHours' ] + ( oRow[ 'DeductMinutes' ] / 60.0 )
+
 		# Deduct time and round to nearest quarter hour
-		bHours = oRow[ 'LogHours' ] - oRow[ 'DeductHours' ]
-		bMinutes = ( oRow[ 'LogMinutes' ] - oRow[ 'DeductMinutes' ] ) / 60.0
+		bLogTime -= bDeductTime
+		bHours = int( bLogTime )
+		bMinutes = float( bLogTime % 1 )
 		if bMinutes <= 0:
-			bMinutes = 0
+			bMinutes = 0.0
 		elif bMinutes > 0 and bMinutes <= .25:
 			bMinutes = .25
 		elif bMinutes > .25 and bMinutes <= .5:
@@ -41,7 +45,7 @@ class App:
 		elif bMinutes > .5 and bMinutes <= .75:
 			bMinutes = .75
 		else:
-			bMinutes = 1
+			bMinutes = 1.0
 
 		return bHours + bMinutes
 
@@ -168,8 +172,10 @@ class App:
 				L.AcceptanceStatus=1 AND
 				L.StartDateTime>=%s AND
 				L.StartDateTime<=%s
-			ORDER BY R.RepName, L.LogComment, L.StartDateTime
+			ORDER BY R.RepName, L.StartDateTime
 		""", ( sRunFrom, sRunTo ) )
+		# Removing the LogComment sort since we don't have a contractor right now.
+		#	ORDER BY R.RepName, L.LogComment, L.StartDateTime
 
 	def _wrapTitle( self, fHTML, rgsBody ):
 
@@ -347,8 +353,8 @@ class App:
 
 def main( argv ):
 
-	sRunFrom = '2017-10-01'
-	sRunTo = '2017-10-07'
+	sRunFrom = '2017-11-19'
+	sRunTo = '2017-12-02'
 
 	oApp = App()
 	print oApp.run( sRunFrom, sRunTo, False )
