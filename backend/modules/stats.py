@@ -47,7 +47,7 @@ class Stats:
 			errMsg('error while generating server ip list [%s]' % e)
 			raise Exception, "System error while generating server ip list."
 
-	def updateIP( self, bSerial, sIPLookup, sIP=None, bPort=None, bSerialController=0, sLocalIP=None ):
+	def updateIP( self, bSerial, sIPLookup, sIP=None, bPort=None, bSerialController=0, sLocalIP=None, sIPV6=None ):
 		""" Update IP address, Port, and Heartbeat for this Server """
 
 		try:
@@ -56,6 +56,7 @@ class Stats:
 
 			if sIP == 'None': sIP = None
 			if bPort == 'None': bPort = None
+			if sIPV6 == 'None': sIPV6 = None
 			try:
 				bSerial = int( bSerial )
 			except ValueError:
@@ -66,10 +67,25 @@ class Stats:
 			except ValueError:
 				return rgoResult
 
+
+			# Is request IP, IPV6?
+			IPLookupIsV6 = False
+			if sIPLookup.count('.') != 3:
+				IPLookupIsV6 = True
+
+
 			# Dynamically get ip address from request
-			if sIP is None or sIP == 'None':
+			if sIP is None and IPLookupIsV6 is False:
 				sIP = sIPLookup
-			rgoResult[ 1 ] = sIP
+
+			if sIPV6 is None and IPLookupIsV6 is True:
+				sIPV6 = sIPLookup
+
+			if sIP is not None:
+				rgoResult[ 1 ] = sIP
+			elif sIPV6 is not None:
+				rgoResult[ 1 ] = sIPV6
+
 
 			# Find Server object
 			oServer = self._dbServerList.getServer( bSerial=bSerial )
@@ -89,25 +105,30 @@ class Stats:
 				bPort = oServer.getPort()
 
 			# Hack for old rda-clients
-			rgs = sIP.split( ':' )
-			if len( rgs ) > 1:
-				bPort = int( rgs[ 1 ] )
-				sIP = rgs[ 0 ]
-				dbgMsg( 'old rda-client format detected ip-[%s] port-[%s]' % ( sIP, bPort ) )
+			if sIP is not None:
+				rgs = sIP.split( ':' )
+				if len( rgs ) > 1:
+					bPort = int( rgs[ 1 ] )
+					sIP = rgs[ 0 ]
+					rgoResult[ 1 ] = sIP
+					dbgMsg( 'old rda-client format detected ip-[%s] port-[%s]' % ( sIP, bPort ) )
 
-			# Update return information
-			rgoResult[ 1 ] = sIP
+
+			# Add port to return information
 			if bPort != 80:
-				rgoResult[ 1 ] = '%s:%s' % ( sIP, bPort )
+				rgoResult[ 1 ] = '%s:%s' % ( rgoResult[ 1 ], bPort )
 
 			# Finally, save updates to server object
-			oServer.setIP( sIP )
+			if sIP is not None:
+				oServer.setIP( sIP )
 			oServer.setRemoteIP( sIPLookup )
 			if sLocalIP is not None:
 				oServer.setLocalIP( sLocalIP )
 			oServer.setPort( bPort )
 			oServer.setController( bSerialController )
 			oServer.setTimestamp( time.time() )
+			if sIPV6 is not None:
+				oServer.setIPV6( sIPV6 )
 			self._dbServerList.setServer( oServer )
 
 			#stdMsg( 'ip updated for serial-[%3s] ip-[%15s] remoteip-[%15s] port-[%4s] controller-[%3s]' % ( bSerial, sIP, sIPLookup, bPort, bSerialController ) )

@@ -116,9 +116,9 @@ CREATE TABLE `Server` (
   `sName` VARCHAR(64) NOT NULL default 'Test',
   `sCategories` VARCHAR(64) NOT NULL default 'test',
   `sPreferred` VARCHAR(64) NOT NULL default 'test',
-  `sIP` VARCHAR(15) NOT NULL default '127.0.0.1',
-  `sRemoteIP` VARCHAR(15) NOT NULL default '127.0.0.1',
-  `sLocalIP` VARCHAR(15) NOT NULL default '127.0.0.1',
+  `sIP` VARCHAR(45) NOT NULL default '127.0.0.1',
+  `sRemoteIP` VARCHAR(45) NOT NULL default '127.0.0.1',
+  `sLocalIP` VARCHAR(45) NOT NULL default '127.0.0.1',
   `bPort` SMALLINT UNSIGNED NOT NULL default 80,
   `bSshPort` SMALLINT UNSIGNED NOT NULL default 22,
 	`sHostname` VARCHAR(64) NOT NULL default '',
@@ -144,6 +144,7 @@ CREATE TABLE `Server` (
 	`sFeatures` VARCHAR(255) NOT NULL default '',
 	`sPosTypes` VARCHAR(255) NOT NULL default '',
   `bLpr` TINYINT(1) NOT NULL default '0',
+  `sIPV6` VARCHAR(45) NOT NULL default '::1',
   PRIMARY KEY  (`bSerial`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 

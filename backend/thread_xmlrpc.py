@@ -320,7 +320,16 @@ class XmlRpcDispatch(SimpleXMLRPCRequestHandler):
 
 class XmlRpcServer(SocketServer.ThreadingMixIn, SimpleXMLRPCServer):
 	def __init__(self, *args):
-		SimpleXMLRPCServer.__init__(self,addr=(args[0], args[1]), requestHandler=XmlRpcDispatch, logRequests=0)
+
+		# Since SimpleXMLRPCServer extends SocketServer.TCPServer we can set the TCPServer.address_family property to socket.AF_INET6 for IPV6 support
+		# if this fails (i.e. because the machine does not support IPV6) we fallback on IPV4
+		# NOTE: AF_INET6 is supposed to support both IPV6, and V4
+		try:
+			self.address_family = socket.AF_INET6
+			SimpleXMLRPCServer.__init__(self,addr=(args[0], args[1]), requestHandler=XmlRpcDispatch, logRequests=0)
+		except:
+			self.address_family = socket.AF_INET
+			SimpleXMLRPCServer.__init__(self,addr=(args[0], args[1]), requestHandler=XmlRpcDispatch, logRequests=0)
 
 		self.oParent = args[ 2 ]
 
