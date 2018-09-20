@@ -55,8 +55,8 @@ class Server:
 			return
 
 		# Used for unittest stub
-		import xmlrpclibt_stub
-		self._oServer = xmlrpclibt_stub.Server(url, *args, **kwargs)
+		#import xmlrpclibt_stub
+		#self._oServer = xmlrpclibt_stub.Server(url, *args, **kwargs)
 
 	def __request( self, methodname, *args, **kwargs ):
 		oFunc = getattr( self._oServer, methodname )
@@ -64,9 +64,9 @@ class Server:
 		oThread.start()
 		oThread.join( self._bTimeout )
 		if oThread.isAlive():
-			raise socket.error, ( 10060, 'The operation timed out.' )
+			raise socket.error, ( 10060, 'The operation timed out 1.' )
 		if oThread.oError:
-			raise oThread.oError, ( 10060, 'The operation timed out.' )
+			raise oThread.oError, ( 10060, 'The operation timed out 2.' )
 		return oThread.oResult
 
 	def __getattr__( self, name ):
@@ -90,3 +90,6 @@ class TimeoutHTTP(httplib.HTTP):
 
 	def set_timeout(self, timeout):
 		self._conn.timeout = timeout
+		
+	def getresponse(self, *args, **kwargs):
+		return self._conn.getresponse( *args, **kwargs )

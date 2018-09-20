@@ -1,0 +1,17 @@
+[Unit]
+Description=Dividia Monarch Backend
+After=syslog.target network.target mariadb.service
+
+[Service]
+Type=forking
+PIDFile=/var/run/monarch-backend.pid
+ExecStart=/usr/local/bin/monarch-backend --debug
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+TimeoutSec=10
+StartLimitInterval=60
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target
+Alias=monarch
