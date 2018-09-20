@@ -20,6 +20,7 @@ dojo.declare(
 		_sIP: "",
 		_sRemoteIP: "",
 		_sLocalIP: "",
+		_sIPV6: "",
 		_bPort: 0,
 		_bSshPort: 0,
 		_sHostname: '',
@@ -85,6 +86,8 @@ dojo.declare(
 					this._sRemoteIP = String( rgsServer[ sKey ] );
 				else if ( sKey == "sLocalIP" )
 					this._sLocalIP = String( rgsServer[ sKey ] );
+				else if ( sKey == "sIPV6" )
+					this._sIPV6 = String( rgsServer[ sKey ] );
 				else if ( sKey == "bPort" )
 					this._bPort = parseInt( rgsServer[ sKey ] );
 				else if ( sKey == "bSshPort" )
@@ -156,6 +159,7 @@ dojo.declare(
 			rgs[ "sIP" ] = this._sIP;
 			rgs[ "sRemoteIP" ] = this._sRemoteIP;
 			rgs[ "sLocalIP" ] = this._sLocalIP;
+			rgs[ "sIPV6" ] = this._sIPV6;
 			rgs[ "bPort" ] = this._bPort;
 			rgs[ "bSshPort" ] = this._bSshPort;
 			rgs[ "sHostname" ] = this._sHostname;
@@ -263,6 +267,15 @@ dojo.declare(
 		setLocalIP: function( sLocalIP )
 		{
 			this._sLocalIP = sLocalIP;
+		},
+
+		getIPV6: function()
+		{
+			return this._sIPV6;
+		},
+		setIPV6: function( sIP )
+		{
+			this._sIPV6 = sIP;
 		},
 
 		getPort: function()

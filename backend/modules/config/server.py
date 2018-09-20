@@ -47,6 +47,8 @@ class Server:
 			if rgsServer['sRemoteIP'] is None: rgsServer['sRemoteIP'] = '000.000.000.000'
 			rgsServer['sLocalIP'] = oServer.getLocalIP()
 			if rgsServer['sLocalIP'] is None: rgsServer['sLocalIP'] = '000.000.000.000'
+			rgsServer['sIPV6'] = oServer.getIPV6()
+			if rgsServer['sIPV6'] is None: rgsServer['sIPV6'] = '::1'
 			rgsServer['bPort'] = oServer.getPort()
 			if rgsServer['bPort'] is None: rgsServer['bPort'] = 80
 			rgsServer['bSshPort'] = oServer.getSshPort()
@@ -115,6 +117,7 @@ class Server:
 			oServer.setIP(rgsServer['sIP'])
 			oServer.setRemoteIP(rgsServer['sRemoteIP'])
 			oServer.setLocalIP(rgsServer['sLocalIP'])
+			oServer.setIPV6(rgsServer['sIPV6'])
 			oServer.setPort(rgsServer['bPort'])
 			oServer.setSshPort(rgsServer['bSshPort'])
 			oServer.setHostname(rgsServer['sHostname'])

@@ -68,6 +68,7 @@ dojo.declare(
 		entMaintenanceOnsite: null,
 		btnSkip: null,
 		pHeartbeat: null,
+		pIPV6: null,
 		pIP: null,
 		pRemoteIP: null,
 		pLocalIP: null,
@@ -827,6 +828,10 @@ dojo.declare(
 			} else {
 				this.pHeartbeat.appendChild( oJump.domNode );
 			}
+
+			while ( this.pIPV6.childNodes.length > 0 )
+				this.pIPV6.removeChild( this.pIPV6.childNodes[ 0 ] )
+			this.pIPV6.appendChild( document.createTextNode( oServer.getIPV6() ) );
 
 			while ( this.pIP.childNodes.length > 0 )
 				this.pIP.removeChild( this.pIP.childNodes[ 0 ] )
