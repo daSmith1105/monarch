@@ -164,7 +164,7 @@ class App:
 	def getAcceptedTimeSlipsByRep( self, sRunFrom, sRunTo ):
 
 		self._oCursor.execute( """
-			SELECT R.RepName, L.LogHours, L.LogMinutes, L.DeductHours, L.DeductMinutes, L.StartDateTime, L.EndDateTime, L.LogComment, I.LaborCost
+			SELECT R.RepName, L.LogHours, L.LogMinutes, L.DeductHours, L.DeductMinutes, L.StartDateTime, L.EndDateTime, L.LogComment, I.LaborCost, L.InternalComments
 			FROM tblTimeSlips AS L, tblReps AS R, tblRepsInfo I
 			WHERE
 				L.Tech=R.RepNumber AND
@@ -254,6 +254,38 @@ class App:
 
 		return rgsBody
 
+	def _wrapPTOHeader( self, fHTML, rgsBody ):
+
+		if fHTML:
+			rgsBody.append( '<tr><td colspan="4" align="left"><strong><em>%s</em></strong></td></tr>' % (
+				'PTO' ) )
+
+		else:
+			rgsBody.append( '%7s\n' % (
+				'PTO' ) )
+
+		return rgsBody
+
+	def _wrapPTOItem( self, fHTML, rgsBody, oPTO, bSubTotal ):
+
+		if fHTML:
+			rgsBody.append( '<tr><td>%s</td><td align="right">%.2f</td><td align="right">%0.2f</td><td align="right">%0.2f</td></tr>' % (
+				oPTO[ 'Date' ],
+				oPTO[ 'Hours' ],
+				oPTO[ 'Rate' ],
+				bSubTotal
+			) )
+
+		else:
+			rgsBody.append( '%-12s%5.2f%6.2f%8.2f' % (
+				oPTO[ 'Date' ],
+				oPTO[ 'Hours' ],
+				oPTO[ 'Rate' ],
+				bSubTotal
+			) )
+
+		return rgsBody
+
 	def prepTimeSlipsByRep( self, fHTML, rgsBody ):
 
 		oRow = self._oCursor.fetchone()
@@ -266,6 +298,10 @@ class App:
 		bTotalHours = 0.0		# Track total hours per week for overtime
 		bWeekSunday = 0			# Used to determine when we need to roll over for overtime
 		bWeek = 1						# Week number
+
+		bPTOAmount = 0.0		# Total dollar amount per tech based on rate and PTO hours (Sick/Vacation)
+		bPTOHours = 0.0			# Track total PTO hours (exclude from overtime calc)
+		rgoPTO = []					# Store PTO entries to output at bottom of time slip (after Weeks hours)
 
 		while oRow:
 
@@ -280,6 +316,14 @@ class App:
 
 			if sRep != sRepCheck:
 				if sRep != '':
+					# Process PTO
+					if len( rgoPTO ) != 0:
+						self._wrapPTOHeader( fHTML, rgsBody )
+						for oPTO in rgoPTO:
+							bSubTotalAmount = oPTO[ 'Hours' ] * oPTO[ 'Rate' ]
+							bTotalAmount += bSubTotalAmount
+							rgsBody = self._wrapPTOItem( fHTML, rgsBody, oPTO, bSubTotalAmount )
+					# Total Rep
 					rgsBody = self._wrapTotalLine( fHTML, rgsBody, bTotalAmount )
 
 				sRep = sRepCheck
@@ -287,6 +331,7 @@ class App:
 				bTotalHours = 0.0
 				bWeekSunday = self._getSundayOrdinal( oRow[ 'StartDateTime' ] )
 				bWeek = 1
+				rgoPTO = []
 
 				rgsBody = self._wrapRepTitle( fHTML, rgsBody, sRep )
 
@@ -301,6 +346,15 @@ class App:
 				rgsBody = self._wrapWeekLine( fHTML, rgsBody, bWeek )
 
 			bHours = self._getAdjustedTime( oRow )
+
+			if oRow[ 'InternalComments' ][ 0:3 ] == 'PTO':
+				rgoPTO.append( {
+					'Date': oRow[ 'StartDateTime' ].strftime( '%m/%d/%Y' ),
+					'Hours': bHours,
+					'Rate': bRate
+				} )
+				oRow = self._oCursor.fetchone()
+				continue
 
 			# Figure overtime rate if needed
 			if bTotalHours > OVERTIME_LIMIT:
@@ -324,6 +378,14 @@ class App:
 			oRow = self._oCursor.fetchone()
 
 		if sRep != '':
+			# Process PTO
+			if len( rgoPTO ) != 0:
+				self._wrapPTOHeader( fHTML, rgsBody )
+				for oPTO in rgoPTO:
+					bSubTotalAmount = oPTO[ 'Hours' ] * oPTO[ 'Rate' ]
+					bTotalAmount += bSubTotalAmount
+					rgsBody = self._wrapPTOItem( fHTML, rgsBody, oPTO, bSubTotalAmount )
+			# Total Rep
 			rgsBody = self._wrapTotalLine( fHTML, rgsBody, bTotalAmount )
 
 		return rgsBody
@@ -353,8 +415,8 @@ class App:
 
 def main( argv ):
 
-	sRunFrom = '2017-11-19'
-	sRunTo = '2017-12-02'
+	sRunFrom = '2018-04-22'
+	sRunTo = '2018-05-05'
 
 	oApp = App()
 	print oApp.run( sRunFrom, sRunTo, False )
