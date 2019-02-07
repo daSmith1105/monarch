@@ -145,6 +145,7 @@ CREATE TABLE `Server` (
 	`sPosTypes` VARCHAR(255) NOT NULL default '',
   `bLpr` TINYINT(1) NOT NULL default '0',
   `sIPV6` VARCHAR(45) NOT NULL default '::1',
+  `fLauncher` BOOLEAN NOT NULL default '1',
   PRIMARY KEY  (`bSerial`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 

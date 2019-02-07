@@ -121,9 +121,9 @@ class Stats:
 				rgoResult[ 1 ] = '%s:%s' % ( rgoResult[ 1 ], bPort )
 
 			# Update our dyndns
-			if fUpdateDYNDNS and oServer.getIP() != sIP:
+			if fUpdateDYNDNS and sIP is not None and oServer.getIP() != sIP:
 				os.system( 'update-ip-route53 4 %s %s 1>/dev/null 2>/dev/null' % ( bSerial, sIP ) )
-			if fUpdateDYNDNS and oServer.getIPV6() != sIPV6:
+			if fUpdateDYNDNS and sIPV6 is not None and oServer.getIPV6() != sIPV6:
 				os.system( 'update-ip-route53 6 %s %s 1>/dev/null 2>/dev/null' % ( bSerial, sIPV6 ) )
 
 			# Finally, save updates to server object
