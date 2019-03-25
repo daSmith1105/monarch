@@ -64,6 +64,7 @@ class Tigerpaw:
 		self._rgoReport.append( TPReportEntry( 5, 'Employee Time Off', 'employee_time_off' ) )
 		self._rgoReport.append( TPReportEntry( 6, 'Hourly Time Slips', 'time_slips' ) )
 		self._rgoReport.append( TPReportEntry( 7, 'Items to Purchase', 'items_to_purchase' ) )
+		self._rgoReport.append( TPReportEntry( 8, 'Command Price Book', 'command_price_book' ) )
 
 	###
 	# Handle getting Report lists
@@ -168,6 +169,11 @@ class Tigerpaw:
 			elif oReport.getPath() == 'items_to_purchase':
 				import modules.tpreports.items_to_purchase
 				oApp = modules.tpreports.items_to_purchase.App()
+				return oApp.run()
+
+			elif oReport.getPath() == 'command_price_book':
+				import modules.tpreports.command_price_book
+				oApp = modules.tpreports.command_price_book.App()
 				return oApp.run()
 
 			return 'Could not run report [%s]' % oReport.getName()
