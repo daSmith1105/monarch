@@ -13,9 +13,6 @@ TECH_COMM = {}
 TECH_COMM[ 'Default' ] = {}
 TECH_COMM[ 'Default' ][ 'Solo' ] = .20
 TECH_COMM[ 'Default' ][ 'Split' ] = .15
-TECH_COMM[ 'Max Raley' ] = {}
-TECH_COMM[ 'Max Raley' ][ 'Solo' ] = .15
-TECH_COMM[ 'Max Raley' ][ 'Split' ] = .10
 
 RATE_INSTALL = 120
 RATE_SERVICE = 75
