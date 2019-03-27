@@ -169,7 +169,7 @@ class App:
 		rgsBody.append( '<h3>%s</h3>' % 'Price Book' )
 
 		rgsBody.append( '<table>' )
-		rgsBody.append( '<thead><tr><th>Item</th><th>Command</th><th>Retail</th></tr></thead><tbody>' )
+		rgsBody.append( '<thead><tr><th>Item ID</th><th>Item</th><th>Command</th><th>Retail</th></tr></thead><tbody>' )
 
 		while oRow:
 
@@ -191,7 +191,8 @@ class App:
 				bCommand = bCommand / 1000.0
 				bCustomer = bCustomer / 1000.0
 
-			rgsBody.append( '<tr><td>%s</td><td>%s</td><td>%s</td></tr>' % (
+			rgsBody.append( '<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>' % (
+				oRow[ 'ItemID' ],
 				sItem,
 				'{:,.2f}'.format(bCommand),
 				'{:,.2f}'.format(bCustomer)
