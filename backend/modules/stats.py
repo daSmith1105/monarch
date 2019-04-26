@@ -401,7 +401,7 @@ class Stats:
 				#dbgMsg( 'camera failure reported using new style' )
 
 				# Delete all cameras that were not sent to us since they have been restored
-				for ixCam in range( 1, 17 ):
+				for ixCam in range( 1, 65 ):
 					if ixCam in rgbCamera: continue
 					oCamera = self._dbCameraList.getCamera( bSerial, ixCam )
 					if oCamera is None: continue
