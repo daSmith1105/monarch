@@ -50,7 +50,7 @@ DROP TABLE IF EXISTS `User`;
 CREATE TABLE `User` (
   `bID` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT UNIQUE,
   `sName` VARCHAR(64) NOT NULL default '',
-  `sPassword` VARCHAR(16) default NULL,
+  `sPassword` VARCHAR(41) default NULL,
   `sDescription` VARCHAR(64) NOT NULL default '',
   `bType` TINYINT UNSIGNED NOT NULL default '0',
   PRIMARY KEY  (`bID`),
@@ -261,7 +261,7 @@ CREATE TABLE `CustUser` (
   `bSerial` SMALLINT UNSIGNED NOT NULL default '0',
   `bID` BIGINT UNSIGNED NOT NULL default '0',
   `sName` VARCHAR(64) NOT NULL default '',
-  `sPassword` VARCHAR(16) default NULL,
+  `sPassword` VARCHAR(41) default NULL,
   `sDescription` VARCHAR(64) NOT NULL default '',
   `bType` TINYINT UNSIGNED NOT NULL default '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
