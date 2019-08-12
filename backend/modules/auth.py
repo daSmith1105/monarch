@@ -47,11 +47,20 @@ class Auth:
 
 	def _authUserInternal(self, oUser, sPass):
 		try:
-			(fSuccess, sHash) = self._libUtil.hashPassword(sPass)
+			# See if we are using the old Mysql hash
+			fUseOldHash = False
+			if len( oUser.getPassword() ) == 16:
+				fUseOldHash = True
+
+			(fSuccess, sHash) = self._libUtil.hashPassword(sPass, fUseOldHash=fUseOldHash)
 			if not fSuccess:
 				return False
 
 			if oUser.getPassword() == sHash:
+				# If using old password hash, upgrade password hash stored in db on the fly
+				if fUseOldHash:
+					if self._libUtil.upgradePasswordHash(oUser.getID(), sPass):
+						dbgMsg( 'upgrade password hash for user [%s]' % oUser.getName() )
 				return True
 			return False
 

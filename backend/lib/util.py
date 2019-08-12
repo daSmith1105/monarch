@@ -47,10 +47,21 @@ class Util:
 			errMsg('cannot convert time [%s] to int [%s]' % (sTime, e))
 			return False
 
-	def hashPassword(self, sPass):
+	def upgradePasswordHash(self, bUserID, sPass):
+		try:
+			rgoResult = self._libDB.query('UPDATE User SET sPassword=PASSWORD(%s) WHERE bID=%s AND sPassword=OLD_PASSWORD(%s)', sPass, bUserID, sPass)
+			return True
+		except Exception, e:
+			errMsg('cannot upgrade password hash from mysql [%d] [%s] [%s]' % (bUserID, sPass, e))
+			return False
+
+	def hashPassword(self, sPass, fUseOldHash=False):
 		try:
 			# Call underlying password func for mysql
-			rgoResult = self._libDB.query('SELECT PASSWORD(%s)', sPass)
+			if not fUseOldHash:
+				rgoResult = self._libDB.query('SELECT PASSWORD(%s)', sPass)
+			else:
+				rgoResult = self._libDB.query('SELECT OLD_PASSWORD(%s)', sPass)
 			if len( rgoResult ) != 0:
 				return (True, rgoResult[0][0])
 			return (False, '')
